@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using ShelfWise.Api.Models;
+using ShelfWise.Domain.Models;
 
-namespace ShelfWise.Api.Data
+namespace ShelfWise.Repository.Data
 {
     public class AppDbContext : DbContext
     {

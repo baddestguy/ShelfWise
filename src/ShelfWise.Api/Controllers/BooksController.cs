@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using ShelfWise.Api.Models;
+using ShelfWise.Domain.Models;
+using ShelfWise.Services.Interfaces;
 
 namespace ShelfWise.Api.Controllers
 {
@@ -8,17 +9,19 @@ namespace ShelfWise.Api.Controllers
     public class BooksController : ControllerBase
     {
         private readonly ILogger<BooksController> _logger;
+        private readonly IBookService _service;
 
-        public BooksController(ILogger<BooksController> logger)
+        public BooksController(ILogger<BooksController> logger, IBookService service)
         {
             _logger = logger;
+            _service = service;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Book>> Get()
+        public async Task<ActionResult<IEnumerable<Book>>> Get(CancellationToken ct)
         {
-            // placeholder - return empty list for initial scaffold
-            return Ok(new List<Book>());
+            var books = await _service.GetAllAsync(ct);
+            return Ok(books);
         }
     }
 }
