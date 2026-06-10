@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: shelfwise
+      POSTGRES_PASSWORD: shelfwise_pwd
+      POSTGRES_DB: shelfwise_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shelfwise -d shelfwise_dev"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  api:
+    build: ./src/ShelfWise.Api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Database=shelfwise_dev;Username=shelfwise;Password=shelfwise_pwd
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+    ports:
+      - "5000:80"
+
+  web:
+    build: ./src/ShelfWise.Web
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  db-data:
