@@ -1,6 +1,6 @@
 ShelfWise
 
-Simple Library Management tool — ASP.NET Core Web API + React SPA.
+A simple Library Management tool — ASP.NET Core Web API + React SPA.
 
 Overview
 - Purpose: implement a small CRUD REST API and SPA for managing books.
@@ -11,20 +11,47 @@ Chosen stack
 - Database: PostgreSQL (development via Docker recommended).
 - Frontend: React (SPA) — can be reused for mobile with React Native later.
 
-Repository goals and first steps
-1. Initialize repository metadata (`README.md`, `LICENSE`, `.gitignore`).
-2. Create solution and two projects: `ShelfWise.Api` (Web API) and `ShelfWise.Web` (React SPA).
-3. Add `Book` model and a minimal `BooksController` with a GET endpoint.
-4. Scaffold React placeholder that calls `/api/books`.
+Developer Quick Start
+Prerequisites
+- Docker & Docker Compose
+- .NET 8 SDK (optional, for running projects locally)
+- Node 18+ and npm (optional, for running frontend locally)
 
-Notes
-- Authentication: intentionally omitted for the initial iteration.
-- Caching and advanced features: implement after endpoints are stable.
+Run the full stack (recommended — Docker)
+1. Build and start services:
+```bash
+docker compose up --build
+```
+2. Open the frontend: http://localhost:3000
+3. API endpoint (books): http://localhost:5000/api/books
 
-Next actions (I'll implement)
-- Create .NET solution and projects.
-- Add model and placeholder endpoints.
-- Scaffold React app and simple fetch UI.
+Notes:
+- The Compose setup runs Postgres, the ASP.NET Core API, and the Vite React dev server.
+- If you modify `src/ShelfWise.Web`, run `npm ci` in that folder and commit `package-lock.json` for reproducible Docker builds.
 
-Contact
-- If you want any change to the stack choices, tell me before I scaffold the projects.
+Run components locally (without Docker)
+- API only:
+```bash
+dotnet build src/ShelfWise.Api
+dotnet run --project src/ShelfWise.Api
+```
+- Frontend only:
+```bash
+cd src/ShelfWise.Web
+npm ci
+npm run dev
+```
+
+Tests
+- Run the placeholder unit tests:
+```bash
+dotnet test tests/ShelfWise.Tests
+```
+
+Troubleshooting
+- If the web UI doesn't load from Docker, ensure containers are up:
+```bash
+docker compose ps
+docker compose logs --tail=100 web
+```
+- If `docker compose up` fails during the web build, run `npm ci` in `src/ShelfWise.Web` to generate `package-lock.json`, then rebuild.
