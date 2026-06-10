@@ -29,6 +29,28 @@ Notes:
 - The Compose setup runs Postgres, the ASP.NET Core API, and the Vite React dev server.
 - If you modify `src/ShelfWise.Web`, run `npm ci` in that folder and commit `package-lock.json` for reproducible Docker builds.
 
+Production & migrations (recommended workflow)
+--
+For development we auto-apply migrations and seed demo data when running in `Development` or when `SEED_DB=true`.
+For production you should run migrations as a controlled deployment step rather than auto-applying from the running application.
+
+Recommended production steps:
+1. Build the app and run DB migrations in your deployment pipeline (example script provided at `scripts/migrate.sh`):
+```bash
+./scripts/migrate.sh
+```
+2. Use a CI/CD job or deployment playbook to run migrations with an account that has schema permissions; log and fail the deployment if migrations fail.
+3. Use a restricted runtime DB user for the app (no schema-change permissions) and a separate migration user for the pipeline.
+4. Disable seeding in production (the app gates seeding to `Development` or `SEED_DB=true`).
+
+CI example
+--
+The repository includes a GitHub Actions job (`apply-migrations`) demonstrating how to run `dotnet-ef database update` in CI. For production wiring:
+- Store DB connection strings and credentials as encrypted secrets. 
+- Run `dotnet ef database update` in a dedicated CI job using the migration user and fail the deployment if the command fails.
+
+If you want, I can add a sample deployment job that runs migrations against a GitHub Actions Postgres service for integration testing.
+
 Run components locally (without Docker)
 - API only:
 ```bash

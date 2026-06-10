@@ -24,14 +24,30 @@ var app = builder.Build();
 app.Urls.Clear();
 app.Urls.Add("http://0.0.0.0:80");
 
-app.UseRouting();
-
-// register repository and services
+// Apply migrations / seed database (development-friendly)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    // DbContext and repositories registered in DI below
+    try
+    {
+        var env = services.GetRequiredService<IHostEnvironment>();
+        var db = services.GetRequiredService<AppDbContext>();
+
+        // Run migrations and seed only in Development, or when SEED_DB=true is set
+        var seedFlag = Environment.GetEnvironmentVariable("SEED_DB");
+        if (env.IsDevelopment() || string.Equals(seedFlag, "true", StringComparison.OrdinalIgnoreCase))
+        {
+            DbInitializer.Initialize(db);
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while initializing the database.");
+    }
 }
+
+app.UseRouting();
 
 app.MapControllers();
 

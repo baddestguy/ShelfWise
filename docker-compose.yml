@@ -17,13 +17,17 @@ services:
       retries: 10
 
   api:
-    build: ./src/ShelfWise.Api
+    build:
+      context: .
+      dockerfile: src/ShelfWise.Api/Dockerfile
     depends_on:
       db:
         condition: service_healthy
     environment:
       - ConnectionStrings__DefaultConnection=Host=db;Database=shelfwise_dev;Username=shelfwise;Password=shelfwise_pwd
       - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ASPNETCORE_ENVIRONMENT=Development
+      - SEED_DB=true
     ports:
       - "5000:80"
 
