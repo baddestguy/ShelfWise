@@ -39,5 +39,18 @@ namespace ShelfWise.Api.Tests
 
             Assert.IsType<NotFoundResult>(result);
         }
+
+        [Fact]
+        public async void Delete_NotFound_Returns_404()
+        {
+            var svc = new Mock<IBookService>();
+            svc.Setup(s => s.DeleteAsync(99, default)).ReturnsAsync(false);
+
+            var controller = new BooksController(Mock.Of<Microsoft.Extensions.Logging.ILogger<BooksController>>(), svc.Object);
+
+            var result = await controller.Delete(99, default);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
     }
 }

@@ -86,5 +86,13 @@ namespace ShelfWise.Api.Controllers
             if (!ok) return NotFound();
             return NoContent();
         }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id, CancellationToken ct)
+        {
+            var ok = await _service.DeleteAsync(id, ct);
+            if (!ok) return NotFound();
+            return NoContent();
+        }
     }
 }

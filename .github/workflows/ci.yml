@@ -24,8 +24,11 @@ jobs:
           dotnet restore src/ShelfWise.Api
           dotnet build src/ShelfWise.Api -c Release --no-restore
 
-      - name: Run tests
-        run: dotnet test tests/ShelfWise.Tests --no-build --verbosity normal
+      - name: Run Controller tests
+        run: dotnet test tests/ShelfWise.Api.Tests --no-build --verbosity normal
+
+      - name: Run Service tests
+        run: dotnet test tests/ShelfWise.Services.Tests --no-build --verbosity normal
 
       - name: Setup Node
         uses: actions/setup-node@v4

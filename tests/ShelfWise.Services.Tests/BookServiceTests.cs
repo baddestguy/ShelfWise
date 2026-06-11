@@ -55,5 +55,19 @@ namespace ShelfWise.Services.Tests
             repo.Verify(r => r.GetByIdAsync(5, It.IsAny<CancellationToken>()), Times.Once);
             repo.Verify(r => r.UpdateAsync(It.IsAny<Book>(), It.IsAny<CancellationToken>()), Times.Once);
         }
+
+        [Fact]
+        public async Task DeleteAsync_ExistingBook_DeletesAndReturnsTrue()
+        {
+            var repo = new Mock<IBookRepository>();
+            repo.Setup(r => r.DeleteAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+            var svc = new BookService(repo.Object);
+
+            var result = await svc.DeleteAsync(5);
+
+            Assert.True(result);
+            repo.Verify(r => r.DeleteAsync(5, It.IsAny<CancellationToken>()), Times.Once);
+        }
     }
 }

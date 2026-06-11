@@ -56,5 +56,10 @@ namespace ShelfWise.Services.Services
         {
             return await _repo.GetByIdAsync(id, ct);
         }
+
+        public async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
+        {
+            return await _repo.DeleteAsync(id, ct);
+        }
     }
 }

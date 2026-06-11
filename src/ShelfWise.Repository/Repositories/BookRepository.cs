@@ -36,5 +36,14 @@ namespace ShelfWise.Repository.Repositories
             var changed = await _db.SaveChangesAsync(ct);
             return changed > 0;
         }
+
+        public async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
+        {
+            var entity = await _db.Books.FindAsync(new object[] { id }, ct);
+            if (entity == null) return false;
+            _db.Books.Remove(entity);
+            var changed = await _db.SaveChangesAsync(ct);
+            return changed > 0;
+        }
     }
 }
