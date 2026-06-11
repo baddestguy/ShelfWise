@@ -45,6 +45,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-test
     if: github.event_name == 'push'
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: shelfwise
+          POSTGRES_PASSWORD: shelfwise_pwd
+          POSTGRES_DB: shelfwise_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U shelfwise -d shelfwise_ci"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=10
     steps:
       - uses: actions/checkout@v4
 
@@ -52,6 +66,18 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
+
+      - name: Wait for Postgres to be ready
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+          echo "Waiting for Postgres on localhost:5432..."
+          for i in {1..60}; do
+            pg_isready -h localhost -p 5432 -U shelfwise -d shelfwise_ci && break
+            echo "Postgres not ready yet, sleeping..."
+            sleep 1
+          done
+          echo "Postgres should be ready."
 
       - name: Install dotnet-ef tool
         run: |
