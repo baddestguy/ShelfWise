@@ -25,5 +25,19 @@ namespace ShelfWise.Api.Tests
 
             Assert.IsType<CreatedAtActionResult>(result);
         }
+
+        [Fact]
+        public async void Patch_NotFound_Returns_404()
+        {
+            var svc = new Mock<IBookService>();
+            svc.Setup(s => s.UpdateAsync(10, It.IsAny<Book>(), default)).ReturnsAsync(false);
+
+            var controller = new BooksController(Mock.Of<Microsoft.Extensions.Logging.ILogger<BooksController>>(), svc.Object);
+            var dto = new UpdateBookDto { Title = "T", Author = "A", TotalCopies = 1 };
+
+            var result = await controller.Update(10, dto, default);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
     }
 }

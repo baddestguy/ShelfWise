@@ -56,10 +56,35 @@ namespace ShelfWise.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Book>> GetById(int id, CancellationToken ct)
         {
-            var all = await _service.GetAllAsync(ct);
-            var book = all.FirstOrDefault(b => b.Id == id);
+            var book = await _service.GetByIdAsync(id, ct);
             if (book == null) return NotFound();
+
             return Ok(book);
+        }
+
+        [HttpPatch("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateBookDto dto, CancellationToken ct)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var existing = await _service.GetByIdAsync(id, ct);
+            if (existing == null) return NotFound();
+
+            // merge only provided fields
+            if (dto.Title != null) existing.Title = dto.Title;
+            if (dto.Author != null) existing.Author = dto.Author;
+            if (dto.Genre != null) existing.Genre = dto.Genre;
+            if (dto.OnHold.HasValue) existing.OnHold = dto.OnHold.Value;
+            if (dto.TotalCopies.HasValue) existing.TotalCopies = dto.TotalCopies.Value;
+
+            if (!string.IsNullOrWhiteSpace(dto.Category) && Enum.TryParse<Category>(dto.Category, true, out var parsed))
+            {
+                existing.Category = parsed;
+            }
+
+            var ok = await _service.UpdateAsync(id, existing, ct);
+            if (!ok) return NotFound();
+            return NoContent();
         }
     }
 }

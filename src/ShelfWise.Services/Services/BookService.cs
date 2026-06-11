@@ -29,5 +29,32 @@ namespace ShelfWise.Services.Services
 
             return await _repo.AddAsync(book, ct);
         }
+
+        public async Task<bool> UpdateAsync(int id, Book updated, CancellationToken ct = default)
+        {
+            var existing = await _repo.GetByIdAsync(id, ct);
+            if (existing == null) return false;
+
+            // map allowed updatable fields
+            existing.Title = updated.Title;
+            existing.Author = updated.Author;
+            existing.Genre = updated.Genre;
+            existing.Category = updated.Category;
+            existing.TotalCopies = updated.TotalCopies;
+            existing.OnHold = updated.OnHold;
+
+            // Adjust Available if TotalCopies changed and Available would exceed it
+            if (existing.TotalCopies < existing.Available)
+            {
+                existing.Available = existing.TotalCopies;
+            }
+
+            return await _repo.UpdateAsync(existing, ct);
+        }
+
+        public async Task<Book?> GetByIdAsync(int id, CancellationToken ct = default)
+        {
+            return await _repo.GetByIdAsync(id, ct);
+        }
     }
 }
