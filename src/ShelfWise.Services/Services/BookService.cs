@@ -17,6 +17,16 @@ namespace ShelfWise.Services.Services
             return await _repo.GetAllAsync(ct);
         }
 
+        public async Task<IEnumerable<BookInventoryItem>> SearchInventoryAsync(string? search, CancellationToken ct = default)
+        {
+            return await _repo.SearchInventoryAsync(search, ct);
+        }
+
+        public async Task<BookInventoryItem?> GetInventoryByIdAsync(int id, CancellationToken ct = default)
+        {
+            return await _repo.GetInventoryByIdAsync(id, ct);
+        }
+
         public async Task<Book> CreateAsync(Book book, CancellationToken ct = default)
         {
             // Ensure basic invariants: TotalCopies must be non-negative

@@ -42,10 +42,10 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> Get(CancellationToken ct)
+        public async Task<ActionResult<IEnumerable<BookResponseDto>>> Get([FromQuery] string? search, CancellationToken ct)
         {
-            var books = await _service.GetAllAsync(ct);
-            return Ok(books);
+            var books = await _service.SearchInventoryAsync(search, ct);
+            return Ok(books.Select(BookResponseDto.FromInventory));
         }
 
         [HttpPost]
@@ -76,12 +76,12 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Book>> GetById(int id, CancellationToken ct)
+        public async Task<ActionResult<BookResponseDto>> GetById(int id, CancellationToken ct)
         {
-            var book = await _service.GetByIdAsync(id, ct);
+            var book = await _service.GetInventoryByIdAsync(id, ct);
             if (book == null) return NotFound();
 
-            return Ok(book);
+            return Ok(BookResponseDto.FromInventory(book));
         }
 
         [HttpPatch("{id:int}")]

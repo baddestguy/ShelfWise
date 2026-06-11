@@ -18,6 +18,57 @@ namespace ShelfWise.Repository.Repositories
             return await _db.Books.AsNoTracking().ToListAsync(ct);
         }
 
+        public async Task<IEnumerable<BookInventoryItem>> SearchInventoryAsync(string? search, CancellationToken ct = default)
+        {
+            var query = _db.Books.AsNoTracking();
+            var trimmedSearch = search?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(trimmedSearch))
+            {
+                var lowered = trimmedSearch.ToLower();
+                var matchesCategory = Enum.TryParse<Category>(trimmedSearch, true, out var category);
+                query = query.Where(b =>
+                    b.Title.ToLower().Contains(lowered) ||
+                    b.Author.ToLower().Contains(lowered) ||
+                    b.Genre.ToLower().Contains(lowered) ||
+                    (matchesCategory && b.Category == category));
+            }
+
+            return await query
+                .OrderBy(b => b.Title)
+                .Select(b => new BookInventoryItem
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Author = b.Author,
+                    Category = b.Category,
+                    Genre = b.Genre,
+                    TotalCopies = b.TotalCopies,
+                    CheckedOutCopies = _db.BorrowRecords.Count(r => r.BookId == b.Id && r.ReturnedAt == null),
+                    AvailableCopies = b.TotalCopies - _db.BorrowRecords.Count(r => r.BookId == b.Id && r.ReturnedAt == null)
+                })
+                .ToListAsync(ct);
+        }
+
+        public async Task<BookInventoryItem?> GetInventoryByIdAsync(int id, CancellationToken ct = default)
+        {
+            return await _db.Books
+                .AsNoTracking()
+                .Where(b => b.Id == id)
+                .Select(b => new BookInventoryItem
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Author = b.Author,
+                    Category = b.Category,
+                    Genre = b.Genre,
+                    TotalCopies = b.TotalCopies,
+                    CheckedOutCopies = _db.BorrowRecords.Count(r => r.BookId == b.Id && r.ReturnedAt == null),
+                    AvailableCopies = b.TotalCopies - _db.BorrowRecords.Count(r => r.BookId == b.Id && r.ReturnedAt == null)
+                })
+                .FirstOrDefaultAsync(ct);
+        }
+
         public async Task<Book> AddAsync(Book book, CancellationToken ct = default)
         {
             var entry = await _db.Books.AddAsync(book, ct);
