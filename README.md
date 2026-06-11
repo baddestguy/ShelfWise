@@ -2,14 +2,17 @@ ShelfWise
 
 A simple Library Management tool — ASP.NET Core Web API + React SPA.
 
-Overview
-- Purpose: implement a small CRUD REST API and SPA for managing books.
-- Model: `Book` with properties: Title, Author, Category, Genre, Available (int), OnHold (int), TotalCopies (int).
+Features
+- Add, edit, and delete books.
+- Mark books as checked in or out
+- Search books
+- Authenticate with SSO as an Admin or Librarian
+
 
 Chosen stack
-- Backend: ASP.NET Core (C#) Web API using Entity Framework Core.
-- Database: PostgreSQL (development via Docker recommended).
-- Frontend: React (SPA) — can be reused for mobile with React Native later.
+- Backend: ASP.NET (C#) Web API using Entity Framework Core.
+- Database: PostgreSQL.
+- Frontend: React (SPA).
 
 Developer Quick Start
 Prerequisites
@@ -28,52 +31,43 @@ docker compose up --build
 Notes:
 - The Compose setup runs Postgres, the ASP.NET Core API, and the Vite React dev server.
 - If you modify `src/ShelfWise.Web`, run `npm ci` in that folder and commit `package-lock.json` for reproducible Docker builds.
+- Use `SEED_DB=true` when running locally to populate sample books (the app seeds only in `Development` or when `SEED_DB=true`).
+- To run the API on a different port, set `ASPNETCORE_URLS` when starting the container or `dotnet run`.
+- The docker-compose file exposes Postgres on `localhost:5432` for convenience;
 
-Production & migrations (recommended workflow)
---
-For development we auto-apply migrations and seed demo data when running in `Development` or when `SEED_DB=true`.
-For production you should run migrations as a controlled deployment step rather than auto-applying from the running application.
 
-Recommended production steps:
-1. Build the app and run DB migrations in your deployment pipeline (example script provided at `scripts/migrate.sh`):
+Local developer checklist:
+- Start full stack:
+
 ```bash
-./scripts/migrate.sh
+docker compose up --build
 ```
-2. Use a CI/CD job or deployment playbook to run migrations with an account that has schema permissions; log and fail the deployment if migrations fail.
-3. Use a restricted runtime DB user for the app (no schema-change permissions) and a separate migration user for the pipeline.
-4. Disable seeding in production (the app gates seeding to `Development` or `SEED_DB=true`).
 
-CI example
---
-The repository includes a GitHub Actions job (`apply-migrations`) demonstrating how to run `dotnet-ef database update` in CI. For production wiring:
-- Store DB connection strings and credentials as encrypted secrets. 
-- Run `dotnet ef database update` in a dedicated CI job using the migration user and fail the deployment if the command fails.
+- Run API only:
 
-If you want, I can add a sample deployment job that runs migrations against a GitHub Actions Postgres service for integration testing.
-
-Run components locally (without Docker)
-- API only:
 ```bash
-dotnet build src/ShelfWise.Api
 dotnet run --project src/ShelfWise.Api
 ```
-- Frontend only:
+
+- Run frontend only:
+
 ```bash
 cd src/ShelfWise.Web
 npm ci
 npm run dev
 ```
 
+- Run unit tests:
+
+```bash
+dotnet test tests/ShelfWise.Tests
+```
+
 Tests
-- Run the placeholder unit tests:
+- Run the unit tests:
 ```bash
 dotnet test tests/ShelfWise.Tests
 ```
 
 Troubleshooting
-- If the web UI doesn't load from Docker, ensure containers are up:
-```bash
-docker compose ps
-docker compose logs --tail=100 web
-```
 - If `docker compose up` fails during the web build, run `npm ci` in `src/ShelfWise.Web` to generate `package-lock.json`, then rebuild.
