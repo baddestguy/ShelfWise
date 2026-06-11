@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ShelfWise.Domain.Models;
 using ShelfWise.Api.Models;
 using ShelfWise.Repository.Data;
-using ShelfWise.Domain.Models;
-
 
 namespace ShelfWise.Api.Controllers
 {
@@ -45,7 +44,15 @@ namespace ShelfWise.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserDto dto, CancellationToken ct)
         {
-            var user = new User { FirstName = dto.FirstName, LastName = dto.LastName };
+            var firstName = dto.FirstName.Trim();
+            var lastName = dto.LastName.Trim();
+
+            if (firstName.Length == 0 || lastName.Length == 0)
+            {
+                return BadRequest(new { message = "First name and last name are required." });
+            }
+
+            var user = new User { FirstName = firstName, LastName = lastName };
             _db.Users.Add(user);
             await _db.SaveChangesAsync(ct);
             return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
