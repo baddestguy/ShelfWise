@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="b9b2437e-b16a-4625-88b3-24bc40e6b909" name="olaoy@BISONG 2026-06-10 19:31:50" runUser="BISONG\olaoy" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-06-10T19:31:50.2643409-05:00" queuing="2026-06-10T19:31:50.2643413-05:00" start="2026-06-10T19:31:45.6029016-05:00" finish="2026-06-10T19:31:50.2677663-05:00" />
+  <TestSettings name="default" id="daef0e1a-f16b-492b-af08-a0d928483f2d">
+    <Deployment runDeploymentRoot="olaoy_BISONG_2026-06-10_19_31_50" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="47ce1d7e-12fa-4faf-8fdc-9f3f3bbf90a4" testId="de598c30-efd6-8ff5-e91f-cbfafa942edf" testName="ShelfWise.Tests.BooksControllerTests.Placeholder_Test_Passes" computerName="BISONG" duration="00:00:00.0021583" startTime="2026-06-10T19:31:50.1932450-05:00" endTime="2026-06-10T19:31:50.1932656-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="47ce1d7e-12fa-4faf-8fdc-9f3f3bbf90a4" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="ShelfWise.Tests.BooksControllerTests.Placeholder_Test_Passes" storage="e:\software projects\shelfwise\tests\shelfwise.tests\bin\debug\net8.0\shelfwise.tests.dll" id="de598c30-efd6-8ff5-e91f-cbfafa942edf">
+      <Execution id="47ce1d7e-12fa-4faf-8fdc-9f3f3bbf90a4" />
+      <TestMethod codeBase="E:\Software Projects\ShelfWise\tests\ShelfWise.Tests\bin\Debug\net8.0\ShelfWise.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ShelfWise.Tests.BooksControllerTests" name="Placeholder_Test_Passes" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="de598c30-efd6-8ff5-e91f-cbfafa942edf" executionId="47ce1d7e-12fa-4faf-8fdc-9f3f3bbf90a4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="1" executed="1" passed="1" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.4.5+1caef2f33e (64-bit .NET 8.0.14)&#xD;
+[xUnit.net 00:00:02.90]   Discovering: ShelfWise.Tests&#xD;
+[xUnit.net 00:00:02.92]   Discovered:  ShelfWise.Tests&#xD;
+[xUnit.net 00:00:02.92]   Starting:    ShelfWise.Tests&#xD;
+[xUnit.net 00:00:02.97]   Finished:    ShelfWise.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

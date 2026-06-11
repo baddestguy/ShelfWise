@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.18.4" />
+    <PackageReference Include="xunit" Version="2.6.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.6.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ShelfWise.Services\ShelfWise.Services.csproj" />
+    <ProjectReference Include="..\..\src\ShelfWise.Domain\ShelfWise.Domain.csproj" />
+    <ProjectReference Include="..\..\src\ShelfWise.Repository\ShelfWise.Repository.csproj" />
+    <ProjectReference Include="..\..\src\ShelfWise.Api\ShelfWise.Api.csproj" />
+  </ItemGroup>
+</Project>

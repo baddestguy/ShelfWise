@@ -17,5 +17,12 @@ namespace ShelfWise.Repository.Repositories
         {
             return await _db.Books.AsNoTracking().ToListAsync(ct);
         }
+
+        public async Task<Book> AddAsync(Book book, CancellationToken ct = default)
+        {
+            var entry = await _db.Books.AddAsync(book, ct);
+            await _db.SaveChangesAsync(ct);
+            return entry.Entity;
+        }
     }
 }

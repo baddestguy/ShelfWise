@@ -16,7 +16,7 @@ namespace ShelfWise.Repository.Data.Migrations
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("ShelfWise.Domain.Models.Book", b =>
+            modelBuilder.Entity<Book>(b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
