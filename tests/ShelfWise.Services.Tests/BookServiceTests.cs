@@ -42,13 +42,13 @@ namespace ShelfWise.Services.Tests
         public async Task UpdateAsync_ExistingBook_UpdatesAndReturnsTrue()
         {
             var repo = new Mock<IBookRepository>();
-            var existing = new Book { Id = 5, Title = "Old", Author = "A", Category = Category.NonFiction, Genre = "G", TotalCopies = 2, Available = 2 };
+            var existing = new Book { Id = 5, Title = "Old", Author = "A", Category = Category.NonFiction, Genre = "G", TotalCopies = 2 };
             repo.Setup(r => r.GetByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
             repo.Setup(r => r.UpdateAsync(It.IsAny<Book>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
             var svc = new BookService(repo.Object);
 
-            var updated = new Book { Title = "New", Author = "B", Category = Category.Fiction, Genre = "NewG", TotalCopies = 3, OnHold = 0 };
+            var updated = new Book { Title = "New", Author = "B", Category = Category.Fiction, Genre = "NewG", TotalCopies = 3 };
             var result = await svc.UpdateAsync(5, updated);
 
             Assert.True(result);

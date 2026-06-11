@@ -1,9 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ShelfWise.Repository.Data;
 using ShelfWise.Repository.Repositories;
-using ShelfWise.Services.Interfaces;
 using ShelfWise.Services.Services;
-using ShelfWise.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,13 +10,34 @@ builder.Services.AddControllers();
 
 // Add DbContext (connection string placed in appsettings in later step)
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsql => npgsql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
 // register repository and service implementations
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IBookService, BookService>();
 
 var app = builder.Build();
+
+// Apply pending EF Core migrations at startup so Docker/devs don't run manual commands
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        logger.LogInformation("Applying database migrations...");
+        db.Database.Migrate();
+        logger.LogInformation("Database migrations applied.");
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating or initializing the database.");
+        throw;
+    }
+}
 
 // Ensure the app listens on all container interfaces
 app.Urls.Clear();

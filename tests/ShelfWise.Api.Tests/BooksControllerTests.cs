@@ -1,10 +1,9 @@
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ShelfWise.Api.Controllers;
-using ShelfWise.Domain.Models;
-using ShelfWise.Services.Interfaces;
 using ShelfWise.Api.Models;
+using ShelfWise.Domain.Models;
+using ShelfWise.Services.Services;
 using Xunit;
 
 namespace ShelfWise.Api.Tests

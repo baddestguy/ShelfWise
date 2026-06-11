@@ -3,7 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.0.0
 MinimumVisualStudioVersion = 10.0.40219.1
-
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShelfWise.Domain", "src\ShelfWise.Domain\ShelfWise.Domain.csproj", "{90E5AE18-CC43-4029-B5EE-F6846428C959}"
@@ -15,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShelfWise.Services.Tests", "tests\ShelfWise.Services.Tests\ShelfWise.Services.Tests.csproj", "{692BBAE9-F14A-41FB-AE43-A18299470E36}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShelfWise.Api.Tests", "tests\ShelfWise.Api.Tests\ShelfWise.Api.Tests.csproj", "{CF99CB6A-E39A-488F-9161-3DB8F5ABF743}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShelfWise.Api", "src\ShelfWise.Api\ShelfWise.Api.csproj", "{01E81C55-F797-34DA-4514-378A862316E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,6 +87,18 @@ Global
 		{CF99CB6A-E39A-488F-9161-3DB8F5ABF743}.Release|x64.Build.0 = Release|Any CPU
 		{CF99CB6A-E39A-488F-9161-3DB8F5ABF743}.Release|x86.ActiveCfg = Release|Any CPU
 		{CF99CB6A-E39A-488F-9161-3DB8F5ABF743}.Release|x86.Build.0 = Release|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Debug|x64.Build.0 = Debug|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Debug|x86.Build.0 = Debug|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Release|x64.ActiveCfg = Release|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Release|x64.Build.0 = Release|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Release|x86.ActiveCfg = Release|Any CPU
+		{01E81C55-F797-34DA-4514-378A862316E3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -96,5 +109,6 @@ Global
 		{D3ED63B9-85EF-4985-A358-6201C8FE927B} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{692BBAE9-F14A-41FB-AE43-A18299470E36} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{CF99CB6A-E39A-488F-9161-3DB8F5ABF743} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{01E81C55-F797-34DA-4514-378A862316E3} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

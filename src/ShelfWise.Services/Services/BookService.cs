@@ -1,7 +1,5 @@
 using ShelfWise.Domain.Models;
 using ShelfWise.Repository.Repositories;
-using ShelfWise.Services.Interfaces;
-using System;
 
 namespace ShelfWise.Services.Services
 {
@@ -21,11 +19,8 @@ namespace ShelfWise.Services.Services
 
         public async Task<Book> CreateAsync(Book book, CancellationToken ct = default)
         {
-            // Ensure basic invariants: set available to TotalCopies if not set
-            if (book.TotalCopies > 0 && book.Available == 0)
-            {
-                book.Available = book.TotalCopies;
-            }
+            // Ensure basic invariants: TotalCopies must be non-negative
+            if (book.TotalCopies < 0) book.TotalCopies = 0;
 
             return await _repo.AddAsync(book, ct);
         }
@@ -41,13 +36,9 @@ namespace ShelfWise.Services.Services
             existing.Genre = updated.Genre;
             existing.Category = updated.Category;
             existing.TotalCopies = updated.TotalCopies;
-            existing.OnHold = updated.OnHold;
 
-            // Adjust Available if TotalCopies changed and Available would exceed it
-            if (existing.TotalCopies < existing.Available)
-            {
-                existing.Available = existing.TotalCopies;
-            }
+            // If TotalCopies decreased below zero, clamp
+            if (existing.TotalCopies < 0) existing.TotalCopies = 0;
 
             return await _repo.UpdateAsync(existing, ct);
         }
@@ -60,6 +51,30 @@ namespace ShelfWise.Services.Services
         public async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
         {
             return await _repo.DeleteAsync(id, ct);
+        }
+
+        public async Task<bool> CheckOutAsync(int bookId, int userId, int dueDays = 14, CancellationToken ct = default)
+        {
+            var total = await _repo.GetTotalCopiesAsync(bookId, ct);
+            var checkedOut = await _repo.GetCheckedOutCountAsync(bookId, ct);
+            if (checkedOut >= total)
+            {
+                // no copies available
+                return false;
+            }
+
+            var dueAt = DateTime.UtcNow.AddDays(dueDays);
+            return await _repo.TryCheckoutAsync(bookId, userId, dueAt, ct);
+        }
+
+        public async Task<bool> CheckInAsync(int bookId, int userId, CancellationToken ct = default)
+        {
+            return await _repo.TryCheckinAsync(bookId, userId, ct);
+        }
+
+        public async Task<int> PlaceHoldAsync(int bookId, int userId, CancellationToken ct = default)
+        {
+            return await _repo.CreateHoldAsync(bookId, userId, ct);
         }
     }
 }

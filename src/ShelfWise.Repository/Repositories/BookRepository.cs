@@ -45,5 +45,71 @@ namespace ShelfWise.Repository.Repositories
             var changed = await _db.SaveChangesAsync(ct);
             return changed > 0;
         }
+
+        public async Task<int> GetCheckedOutCountAsync(int bookId, CancellationToken ct = default)
+        {
+            return await _db.BorrowRecords.CountAsync(b => b.BookId == bookId && b.ReturnedAt == null, ct);
+        }
+
+        public async Task<int> GetTotalCopiesAsync(int bookId, CancellationToken ct = default)
+        {
+            var book = await _db.Books.FindAsync(new object[] { bookId }, ct);
+            return book?.TotalCopies ?? 0;
+        }
+
+        public async Task<bool> TryCheckoutAsync(int bookId, int userId, DateTime dueAt, CancellationToken ct = default)
+        {
+            using var tx = await _db.Database.BeginTransactionAsync(ct);
+            var checkedOut = await GetCheckedOutCountAsync(bookId, ct);
+            var book = await _db.Books.FindAsync(new object[] { bookId }, ct);
+            if (book == null) return false;
+            if (checkedOut >= book.TotalCopies)
+            {
+                // no copies available
+                return false;
+            }
+
+            var record = new BorrowRecord
+            {
+                BookId = bookId,
+                UserId = userId,
+                CheckedOutAt = DateTime.UtcNow,
+                DueAt = dueAt
+            };
+            await _db.BorrowRecords.AddAsync(record, ct);
+            await _db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return true;
+        }
+
+        public async Task<BorrowRecord?> GetActiveBorrowRecordAsync(int bookId, int userId, CancellationToken ct = default)
+        {
+            return await _db.BorrowRecords.FirstOrDefaultAsync(b => b.BookId == bookId && b.UserId == userId && b.ReturnedAt == null, ct);
+        }
+
+        public async Task<bool> TryCheckinAsync(int bookId, int userId, CancellationToken ct = default)
+        {
+            using var tx = await _db.Database.BeginTransactionAsync(ct);
+            var record = await GetActiveBorrowRecordAsync(bookId, userId, ct);
+            if (record == null) return false;
+            record.ReturnedAt = DateTime.UtcNow;
+            _db.BorrowRecords.Update(record);
+            await _db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return true;
+        }
+
+        public async Task<int> CreateHoldAsync(int bookId, int userId, CancellationToken ct = default)
+        {
+            var hold = new HoldRecord
+            {
+                BookId = bookId,
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _db.HoldRecords.AddAsync(hold, ct);
+            await _db.SaveChangesAsync(ct);
+            return hold.Id;
+        }
     }
 }

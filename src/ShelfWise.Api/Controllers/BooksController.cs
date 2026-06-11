@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using ShelfWise.Domain.Models;
-using ShelfWise.Services.Interfaces;
 using ShelfWise.Api.Models;
+using ShelfWise.Domain.Models;
+using ShelfWise.Services.Services;
 
 namespace ShelfWise.Api.Controllers
 {
@@ -16,6 +16,29 @@ namespace ShelfWise.Api.Controllers
         {
             _logger = logger;
             _service = service;
+        }
+
+        [HttpPost("{id}/checkout")]
+        public async Task<IActionResult> Checkout(int id, [FromBody] CheckoutRequestDto dto, CancellationToken ct)
+        {
+            var ok = await _service.CheckOutAsync(id, dto.UserId, dto.DueDays, ct);
+            if (!ok) return BadRequest(new { message = "No copies available" });
+            return Ok();
+        }
+
+        [HttpPost("{id}/checkin")]
+        public async Task<IActionResult> Checkin(int id, [FromBody] CheckinRequestDto dto, CancellationToken ct)
+        {
+            var ok = await _service.CheckInAsync(id, dto.UserId, ct);
+            if (!ok) return BadRequest(new { message = "Not checked out by user" });
+            return Ok();
+        }
+
+        [HttpPost("{id}/hold")]
+        public async Task<IActionResult> PlaceHold(int id, [FromBody] HoldRequestDto dto, CancellationToken ct)
+        {
+            var holdId = await _service.PlaceHoldAsync(id, dto.UserId, ct);
+            return CreatedAtAction(nameof(GetById), new { id }, new { holdId });
         }
 
         [HttpGet]
@@ -36,8 +59,7 @@ namespace ShelfWise.Api.Controllers
                 Title = dto.Title,
                 Author = dto.Author,
                 Genre = dto.Genre,
-                TotalCopies = dto.TotalCopies,
-                OnHold = 0,
+                TotalCopies = dto.TotalCopies
             };
 
             if (Enum.TryParse<Category>(dto.Category, true, out var parsed))
@@ -74,7 +96,6 @@ namespace ShelfWise.Api.Controllers
             if (dto.Title != null) existing.Title = dto.Title;
             if (dto.Author != null) existing.Author = dto.Author;
             if (dto.Genre != null) existing.Genre = dto.Genre;
-            if (dto.OnHold.HasValue) existing.OnHold = dto.OnHold.Value;
             if (dto.TotalCopies.HasValue) existing.TotalCopies = dto.TotalCopies.Value;
 
             if (!string.IsNullOrWhiteSpace(dto.Category) && Enum.TryParse<Category>(dto.Category, true, out var parsed))

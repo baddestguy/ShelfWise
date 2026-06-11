@@ -1,6 +1,6 @@
 using ShelfWise.Domain.Models;
 
-namespace ShelfWise.Services.Interfaces
+namespace ShelfWise.Services.Services
 {
     public interface IBookService
     {
@@ -9,5 +9,8 @@ namespace ShelfWise.Services.Interfaces
         Task<bool> UpdateAsync(int id, Book updated, CancellationToken ct = default);
         Task<Book?> GetByIdAsync(int id, CancellationToken ct = default);
         Task<bool> DeleteAsync(int id, CancellationToken ct = default);
+        Task<bool> CheckOutAsync(int bookId, int userId, int dueDays = 14, CancellationToken ct = default);
+        Task<bool> CheckInAsync(int bookId, int userId, CancellationToken ct = default);
+        Task<int> PlaceHoldAsync(int bookId, int userId, CancellationToken ct = default);
     }
 }
