@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
 
 // Add DbContext (connection string placed in appsettings in later step)
 builder.Services.AddDbContext<AppDbContext>(options =>

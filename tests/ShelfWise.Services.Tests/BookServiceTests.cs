@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using ShelfWise.Domain.Models;
 using ShelfWise.Repository.Repositories;
@@ -11,6 +12,11 @@ namespace ShelfWise.Services.Tests
 {
     public class BookServiceTests
     {
+        private static BookService CreateService(Mock<IBookRepository> repo)
+        {
+            return new BookService(repo.Object, new MemoryCache(new MemoryCacheOptions()));
+        }
+
         [Fact]
         public async Task CreateAsync_MapsDtoAndCallsRepository()
         {
@@ -18,7 +24,7 @@ namespace ShelfWise.Services.Tests
             repo.Setup(r => r.AddAsync(It.IsAny<Book>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Book b, CancellationToken ct) => { b.Id = 123; return b; });
 
-            var svc = new BookService(repo.Object);
+            var svc = CreateService(repo);
 
             var domain = new Book
             {
@@ -46,7 +52,7 @@ namespace ShelfWise.Services.Tests
             repo.Setup(r => r.GetByIdAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
             repo.Setup(r => r.UpdateAsync(It.IsAny<Book>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
-            var svc = new BookService(repo.Object);
+            var svc = CreateService(repo);
 
             var updated = new Book { Title = "New", Author = "B", Category = Category.Fiction, Genre = "NewG", TotalCopies = 3 };
             var result = await svc.UpdateAsync(5, updated);
@@ -62,7 +68,7 @@ namespace ShelfWise.Services.Tests
             var repo = new Mock<IBookRepository>();
             repo.Setup(r => r.DeleteAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
-            var svc = new BookService(repo.Object);
+            var svc = CreateService(repo);
 
             var result = await svc.DeleteAsync(5);
 
