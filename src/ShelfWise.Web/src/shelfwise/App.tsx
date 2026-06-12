@@ -78,6 +78,7 @@ export default function App() {
 
   useEffect(() => {
     loadInitialData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role])
 
   useEffect(() => {
@@ -91,6 +92,7 @@ export default function App() {
     }, 250)
 
     return () => window.clearTimeout(handle)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search])
 
   function updateForm(field: keyof BookFormState, value: string) {
@@ -201,7 +203,7 @@ export default function App() {
   }
 
   async function deleteBook(book: Book) {
-    if (!window.confirm(`Delete "${book.title}"?`)) return
+    if (typeof window !== 'undefined' && !window.confirm(`Delete "${book.title}"?`)) return
     setError('')
     setMessage('')
 

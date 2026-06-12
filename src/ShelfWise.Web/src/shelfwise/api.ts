@@ -1,7 +1,9 @@
 import type { Role } from './types'
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? ''
+
 export async function request<T>(path: string, options: RequestInit = {}, role: Role = 'Patron'): Promise<T> {
-  const response = await fetch(path, {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
     headers: { 'Content-Type': 'application/json', 'X-User-Role': role, ...(options.headers || {}) },
     ...options
   })

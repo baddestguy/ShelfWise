@@ -1,0 +1,700 @@
+/* ShelfWise — Library Noir
+ * Scoped under .shelfwise-app. CSS variables are defined in src/styles.css
+ * (@theme block) and are globally available on :root via Tailwind v4.
+ * When you take this back to your real repo, copy the @theme block from
+ * src/styles.css alongside this file to keep the same look.
+ */
+
+
+:root {
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --color-parchment: #f5f0e0;
+  --color-parchment-deep: #ebe3cc;
+  --color-parchment-soft: #faf6e9;
+  --color-ink: #0f1b3d;
+  --color-ink-soft: #1e3a5f;
+  --color-ink-muted: #4a5878;
+  --color-brass: #c9a84c;
+  --color-brass-deep: #9c7f2f;
+  --color-rust: #9f3f2f;
+  --color-leaf: #2f6f4e;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-parchment);
+}
+
+.shelfwise-app {
+  background:
+    radial-gradient(1200px 600px at 12% -10%, rgba(201,168,76,0.10), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(15,27,61,0.06), transparent 55%),
+    var(--color-parchment);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shelfwise-app *,
+.shelfwise-app *::before,
+.shelfwise-app *::after { box-sizing: border-box; }
+
+.shelfwise-app button,
+.shelfwise-app input,
+.shelfwise-app select,
+.shelfwise-app textarea { font: inherit; color: inherit; }
+
+/* ---------- layout shell ---------- */
+.shelfwise-app .app-shell {
+  margin: 0 auto;
+  max-width: 1480px;
+  padding: 40px 48px 64px;
+}
+
+@media (max-width: 1100px) {
+  .shelfwise-app .app-shell { padding: 28px 24px 48px; }
+}
+
+/* ---------- header ---------- */
+.shelfwise-app .topbar {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  padding-bottom: 28px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 12%, transparent);
+  position: relative;
+}
+
+.shelfwise-app .topbar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 64px;
+  height: 2px;
+  background: var(--color-brass);
+}
+
+.shelfwise-app .topbar h1 {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 60px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  margin: 0 0 10px;
+  color: var(--color-ink);
+}
+
+.shelfwise-app .topbar p {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  margin: 0;
+}
+
+.shelfwise-app .header-controls {
+  align-items: end;
+  display: flex;
+  gap: 14px;
+}
+
+/* ---------- shared form atoms ---------- */
+.shelfwise-app .role-picker,
+.shelfwise-app .search-field,
+.shelfwise-app .ai-form label,
+.shelfwise-app .book-form label,
+.shelfwise-app .user-form label,
+.shelfwise-app .modal label {
+  display: grid;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.shelfwise-app .role-picker select { min-width: 168px; }
+
+.shelfwise-app input,
+.shelfwise-app select,
+.shelfwise-app textarea {
+  background: var(--color-parchment-soft);
+  border: 1px solid color-mix(in oklab, var(--color-ink) 18%, transparent);
+  border-radius: 4px;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  min-height: 42px;
+  padding: 10px 14px;
+  width: 100%;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.shelfwise-app select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--color-ink) 50%), linear-gradient(135deg, var(--color-ink) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+}
+
+.shelfwise-app input:focus,
+.shelfwise-app select:focus,
+.shelfwise-app textarea:focus {
+  border-color: var(--color-brass);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-brass) 28%, transparent);
+}
+
+.shelfwise-app textarea {
+  min-height: 104px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.shelfwise-app input::placeholder,
+.shelfwise-app textarea::placeholder { color: color-mix(in oklab, var(--color-ink) 38%, transparent); }
+
+/* ---------- buttons ---------- */
+.shelfwise-app button {
+  align-items: center;
+  background: var(--color-ink);
+  border: 1px solid var(--color-ink);
+  border-radius: 4px;
+  color: var(--color-parchment-soft);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  gap: 8px;
+  justify-content: center;
+  letter-spacing: 0.14em;
+  min-height: 40px;
+  padding: 0 18px;
+  text-transform: uppercase;
+  transition: transform .12s ease, background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.shelfwise-app button:hover:not(:disabled) {
+  background: var(--color-ink-soft);
+  box-shadow: 0 6px 20px -10px rgba(15,27,61,.55);
+}
+
+.shelfwise-app button:active:not(:disabled) { transform: scale(0.985); }
+.shelfwise-app button:disabled { cursor: not-allowed; opacity: 0.4; }
+
+.shelfwise-app button.secondary {
+  background: transparent;
+  border-color: color-mix(in oklab, var(--color-ink) 26%, transparent);
+  color: var(--color-ink);
+}
+
+.shelfwise-app button.secondary:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--color-ink) 6%, transparent);
+  border-color: var(--color-ink);
+  box-shadow: none;
+}
+
+.shelfwise-app button.danger {
+  background: var(--color-rust);
+  border-color: var(--color-rust);
+  color: var(--color-parchment-soft);
+}
+
+.shelfwise-app button.danger:hover:not(:disabled) { background: #7c2316; border-color: #7c2316; }
+
+/* AI primary CTA — brass treatment */
+.shelfwise-app .ai-form > button[type="submit"] {
+  background: var(--color-brass);
+  border-color: var(--color-brass);
+  color: var(--color-ink);
+}
+
+.shelfwise-app .ai-form > button[type="submit"]:hover:not(:disabled) {
+  background: var(--color-brass-deep);
+  border-color: var(--color-brass-deep);
+  color: var(--color-parchment-soft);
+  box-shadow: 0 6px 20px -10px rgba(201,168,76,.65);
+}
+
+/* ---------- toolbar / search ---------- */
+.shelfwise-app .toolbar {
+  align-items: end;
+  display: flex;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.shelfwise-app .search-field { flex: 1; }
+
+/* ---------- notice ---------- */
+.shelfwise-app .notice {
+  align-items: center;
+  border-radius: 4px;
+  display: flex;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  text-transform: uppercase;
+  border-left: 3px solid;
+}
+
+.shelfwise-app .notice.success {
+  background: color-mix(in oklab, var(--color-leaf) 12%, var(--color-parchment-soft));
+  color: var(--color-leaf);
+  border-left-color: var(--color-leaf);
+}
+
+.shelfwise-app .notice.error {
+  background: color-mix(in oklab, var(--color-rust) 12%, var(--color-parchment-soft));
+  color: var(--color-rust);
+  border-left-color: var(--color-rust);
+}
+
+/* ---------- workspace ---------- */
+.shelfwise-app .workspace {
+  align-items: start;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: 340px minmax(0, 1fr);
+}
+
+.shelfwise-app .side-panel {
+  display: grid;
+  gap: 20px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  position: sticky;
+  top: 24px;
+}
+
+/* ---------- rail cards ---------- */
+.shelfwise-app .ai-form,
+.shelfwise-app .book-form,
+.shelfwise-app .user-form,
+.shelfwise-app .permission-card {
+  background: var(--color-parchment-soft);
+  border: 1px solid color-mix(in oklab, var(--color-ink) 14%, transparent);
+  border-radius: 6px;
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  position: relative;
+}
+
+.shelfwise-app .ai-form { gap: 18px; }
+
+.shelfwise-app .ai-form::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--color-brass);
+  border-radius: 6px 6px 0 0;
+}
+
+.shelfwise-app .ai-form h2,
+.shelfwise-app .book-form h2,
+.shelfwise-app .user-form h2,
+.shelfwise-app .permission-card h2 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--color-ink);
+}
+
+/* ---------- AI results ---------- */
+.shelfwise-app .ai-results {
+  border-top: 1px solid color-mix(in oklab, var(--color-ink) 12%, transparent);
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+}
+
+.shelfwise-app .ai-results > p {
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.shelfwise-app .ai-results .ai-mode {
+  align-self: start;
+  background: color-mix(in oklab, var(--color-brass) 18%, transparent);
+  border-radius: 2px;
+  color: var(--color-brass-deep);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  padding: 4px 10px;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.shelfwise-app .ai-results ol {
+  counter-reset: rec;
+  display: grid;
+  gap: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.shelfwise-app .ai-results li {
+  counter-increment: rec;
+  display: grid;
+  gap: 4px;
+  padding-left: 32px;
+  position: relative;
+}
+
+.shelfwise-app .ai-results li::before {
+  content: counter(rec, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-brass-deep);
+}
+
+.shelfwise-app .ai-results strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--color-ink);
+}
+
+.shelfwise-app .ai-results span {
+  display: block;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+  text-transform: none;
+}
+
+.shelfwise-app .ai-results li > p {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 4px 0 0;
+}
+
+/* ---------- permission card ---------- */
+.shelfwise-app .permission-card p {
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ---------- form rows ---------- */
+.shelfwise-app .form-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 110px;
+}
+
+.shelfwise-app .form-actions { display: flex; gap: 10px; }
+
+/* ---------- table panel ---------- */
+.shelfwise-app .book-table-panel {
+  background: var(--color-parchment-soft);
+  border: 1px solid color-mix(in oklab, var(--color-ink) 14%, transparent);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 300px);
+  min-height: 420px;
+  overflow: hidden;
+}
+
+.shelfwise-app .table-scroll {
+  flex: 1;
+  overflow: auto;
+}
+
+.shelfwise-app table {
+  border-collapse: collapse;
+  min-width: 980px;
+  width: 100%;
+}
+
+.shelfwise-app th,
+.shelfwise-app td {
+  padding: 18px 20px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 8%, transparent);
+}
+
+.shelfwise-app th {
+  background: var(--color-parchment-deep);
+  color: var(--color-ink-muted);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding: 14px 20px;
+  text-transform: uppercase;
+  border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 16%, transparent);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.shelfwise-app tbody tr {
+  transition: background .15s ease;
+}
+
+.shelfwise-app tbody tr:hover {
+  background: color-mix(in oklab, var(--color-brass) 8%, transparent);
+}
+
+.shelfwise-app tbody tr:last-child td { border-bottom: 0; }
+
+.shelfwise-app td {
+  font-size: 14px;
+  color: var(--color-ink-soft);
+}
+
+.shelfwise-app .title-cell {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.005em;
+}
+
+/* ---------- pill ---------- */
+.shelfwise-app .pill {
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid;
+  display: inline-flex;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  height: 28px;
+  justify-content: center;
+  min-width: 36px;
+  padding: 0 10px;
+}
+
+.shelfwise-app .pill.available {
+  background: color-mix(in oklab, var(--color-brass) 14%, transparent);
+  border-color: color-mix(in oklab, var(--color-brass) 55%, transparent);
+  color: var(--color-brass-deep);
+}
+
+.shelfwise-app .pill.unavailable {
+  background: color-mix(in oklab, var(--color-rust) 10%, transparent);
+  border-color: color-mix(in oklab, var(--color-rust) 40%, transparent);
+  color: var(--color-rust);
+}
+
+/* ---------- row actions ---------- */
+.shelfwise-app .row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.shelfwise-app .row-actions button {
+  min-height: 30px;
+  padding: 0 12px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+/* ---------- empty state ---------- */
+.shelfwise-app .empty-state {
+  color: var(--color-ink-muted);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 48px;
+  text-align: center;
+}
+
+/* ---------- pagination ---------- */
+.shelfwise-app .pagination {
+  align-items: center;
+  background: var(--color-parchment-deep);
+  border-top: 1px solid color-mix(in oklab, var(--color-ink) 14%, transparent);
+  display: flex;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  gap: 16px;
+  justify-content: space-between;
+  letter-spacing: 0.1em;
+  padding: 16px 20px;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.shelfwise-app .pagination label {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  font-family: var(--font-display);
+  font-size: 11px;
+  gap: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.shelfwise-app .pagination-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.shelfwise-app .pagination-controls select {
+  min-height: 32px;
+  min-width: 76px;
+  padding: 4px 26px 4px 10px;
+  background-color: var(--color-parchment-soft);
+}
+
+.shelfwise-app .pagination-controls button {
+  min-height: 32px;
+  padding: 0 14px;
+  font-size: 10px;
+}
+
+/* ---------- modal ---------- */
+.shelfwise-app .modal-backdrop {
+  align-items: center;
+  background: color-mix(in oklab, var(--color-ink) 60%, transparent);
+  backdrop-filter: blur(6px);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 50;
+  animation: shelfwise-fade .18s ease;
+}
+
+@keyframes shelfwise-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.shelfwise-app .modal {
+  background: var(--color-parchment-soft);
+  border: 1px solid color-mix(in oklab, var(--color-ink) 18%, transparent);
+  border-top: 3px solid var(--color-brass);
+  border-radius: 6px;
+  display: grid;
+  gap: 18px;
+  max-width: 440px;
+  padding: 28px;
+  width: 100%;
+  box-shadow: 0 30px 80px -20px rgba(15,27,61,.5);
+  animation: shelfwise-rise .22s cubic-bezier(.2,.7,.3,1);
+}
+
+@keyframes shelfwise-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.shelfwise-app .modal h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+
+.shelfwise-app .modal p {
+  color: var(--color-ink-muted);
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.shelfwise-app .modal-error {
+  background: color-mix(in oklab, var(--color-rust) 12%, transparent);
+  border-left: 3px solid var(--color-rust);
+  border-radius: 4px;
+  color: var(--color-rust);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 12px 14px;
+  text-transform: uppercase;
+}
+
+.shelfwise-app .modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .shelfwise-app .workspace { grid-template-columns: 1fr; }
+  .shelfwise-app .side-panel {
+    max-height: none;
+    overflow: visible;
+    position: static;
+  }
+  .shelfwise-app .book-table-panel {
+    max-height: none;
+    min-height: 0;
+  }
+  .shelfwise-app .table-scroll {
+    max-height: 70vh;
+  }
+}
+
+@media (max-width: 760px) {
+  .shelfwise-app .app-shell { padding: 24px 18px 40px; }
+  .shelfwise-app .topbar,
+  .shelfwise-app .toolbar { align-items: stretch; flex-direction: column; }
+  .shelfwise-app .header-controls { align-items: stretch; flex-direction: column; }
+  .shelfwise-app .pagination { align-items: stretch; flex-direction: column; }
+  .shelfwise-app th, .shelfwise-app td { padding: 14px 14px; }
+}

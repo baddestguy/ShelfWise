@@ -32,7 +32,7 @@ export function AiLibrarian({ query, result, searching, onQueryChange, onSubmit 
             {result.matches.map(match => (
               <li key={match.book.id}>
                 <strong>{match.book.title}</strong>
-                <span>{match.book.author} · Score {match.score}</span>
+                <span>{match.book.author} - Score {match.score}</span>
                 <p>{match.reason}</p>
               </li>
             ))}
