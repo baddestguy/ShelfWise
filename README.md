@@ -43,6 +43,7 @@ Open:
 - Web app: http://localhost:3000
 - API books endpoint: http://localhost:5000/api/books
 - API users endpoint: http://localhost:5000/api/users (requires `Librarian` or `Admin`)
+- Swagger UI: http://localhost:5000/swagger
 
 The API applies database setup on startup and seeds sample books/users in Development or when `SEED_DB=true`.
 
@@ -159,6 +160,13 @@ Authorization: Bearer <token>
 For production, configure `JWT_SIGNING_KEY` or `Jwt:SigningKey` with a strong secret. A real SSO provider such as Microsoft Entra ID, Auth0, or Okta could replace the login endpoint later while keeping the same authorization policies.
 
 ## API Examples
+
+Swagger UI is available locally and in the deployed API:
+
+- Local: http://localhost:5000/swagger
+- Production: https://shelfwise-api-production.up.railway.app/swagger
+
+To test protected endpoints in Swagger, call `POST /api/auth/login`, copy the `token` value from the response, click `Authorize`, and paste the token.
 
 Search books:
 
