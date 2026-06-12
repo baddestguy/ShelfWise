@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ShelfWise.Api.Controllers;
@@ -11,7 +12,7 @@ namespace ShelfWise.Api.Tests
     public class BooksControllerTests
     {
         [Fact]
-        public async void Create_Returns_Created()
+        public async Task Create_Returns_Created()
         {
                 var svc = new Mock<IBookService>();
                 svc.Setup(s => s.CreateAsync(It.IsAny<Book>(), default))
@@ -26,7 +27,7 @@ namespace ShelfWise.Api.Tests
         }
 
         [Fact]
-        public async void Patch_NotFound_Returns_404()
+        public async Task Patch_NotFound_Returns_404()
         {
             var svc = new Mock<IBookService>();
             svc.Setup(s => s.UpdateAsync(10, It.IsAny<Book>(), default)).ReturnsAsync(false);
@@ -40,7 +41,7 @@ namespace ShelfWise.Api.Tests
         }
 
         [Fact]
-        public async void Delete_NotFound_Returns_404()
+        public async Task Delete_NotFound_Returns_404()
         {
             var svc = new Mock<IBookService>();
             svc.Setup(s => s.DeleteAsync(99, default)).ReturnsAsync(false);

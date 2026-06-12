@@ -19,16 +19,13 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore and build API
+      - name: Restore and build .NET solution
         run: |
-          dotnet restore src/ShelfWise.Api
-          dotnet build src/ShelfWise.Api -c Release --no-restore
+          dotnet restore ShelfWise.sln
+          dotnet build ShelfWise.sln -c Release --no-restore
 
-      - name: Run Controller tests
-        run: dotnet test tests/ShelfWise.Api.Tests --no-build --verbosity normal
-
-      - name: Run Service tests
-        run: dotnet test tests/ShelfWise.Services.Tests --no-build --verbosity normal
+      - name: Run .NET tests
+        run: dotnet test ShelfWise.sln -c Release --no-build --verbosity normal
 
       - name: Setup Node
         uses: actions/setup-node@v4
