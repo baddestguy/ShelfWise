@@ -58,21 +58,15 @@ using (var scope = app.Services.CreateScope())
 app.Urls.Clear();
 app.Urls.Add("http://0.0.0.0:80");
 
-// Apply migrations / seed database (development-friendly)
+// Ensure schema exists and seed demo data. This runs in production too so hosted demos
+// can start from an empty managed database.
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        var env = services.GetRequiredService<IHostEnvironment>();
         var db = services.GetRequiredService<AppDbContext>();
-
-        // Run migrations and seed only in Development, or when SEED_DB=true is set
-        var seedFlag = Environment.GetEnvironmentVariable("SEED_DB");
-        if (env.IsDevelopment() || string.Equals(seedFlag, "true", StringComparison.OrdinalIgnoreCase))
-        {
-            DbInitializer.Initialize(db);
-        }
+        DbInitializer.Initialize(db);
     }
     catch (Exception ex)
     {
