@@ -6,6 +6,7 @@ ShelfWise is a library management app built with an ASP.NET Core API, PostgreSQL
 
 - Web app: https://shelfwise-web-production.up.railway.app
 - API: https://shelfwise-api-production.up.railway.app/api/books
+- Swagger: https://shelfwise-api-production.up.railway.app/swagger
 
 ## Features
 
@@ -14,7 +15,7 @@ ShelfWise is a library management app built with an ASP.NET Core API, PostgreSQL
 - Circulation: check books out to users and check them back in.
 - User management: list users as a Librarian/Admin and create users as an Admin.
 - JWT authentication with seeded Patron, Librarian, and Admin demo accounts.
-- TypeScript React dashboard for search, inventory, circulation, user selection, and role switching.
+- TypeScript React dashboard for search, inventory, circulation, user selection, JWT login, and role-based actions.
 - In-memory cache for book inventory and search responses, invalidated after mutations.
 - AI Librarian semantic search using OpenAI embeddings when `OPENAI_API_KEY` is configured, with a local fallback when it is not.
 - Docker Compose setup for the API, web app, and PostgreSQL database.
@@ -45,7 +46,7 @@ Open:
 - API users endpoint: http://localhost:5000/api/users (requires `Librarian` or `Admin`)
 - Swagger UI: http://localhost:5000/swagger
 
-The API applies database setup on startup and seeds sample books/users in Development or when `SEED_DB=true`.
+The API applies EF Core migrations on startup, ensures the demo schema exists, and seeds missing sample books plus demo login users. This runs in local Docker and in hosted deployments so a fresh database can start ready for testing.
 
 Optional AI configuration:
 
@@ -102,6 +103,12 @@ For a hosted frontend that proxies API calls to a public API service, configure:
 ```env
 VITE_API_TARGET=https://your-api-domain.example.com
 VITE_ALLOWED_HOSTS=your-web-domain.example.com
+```
+
+For static/client-side API calls without the Vite proxy, configure:
+
+```env
+VITE_API_BASE_URL=https://your-api-domain.example.com
 ```
 
 Run tests:
@@ -231,8 +238,9 @@ The solution is split into small projects:
 
 ## Current Tradeoffs
 
-- Authentication uses a demo header scheme rather than real SSO. The authorization policies are intentionally structured so a real SSO/JWT provider can replace the demo handler later.
-- The local database setup includes deterministic schema creation for demo reliability.
+- Authentication uses local username/password login with JWT bearer tokens rather than third-party SSO. The authorization policies are intentionally structured so an OpenID Connect provider could replace the login endpoint later.
+- Startup applies migrations, ensures schema compatibility, and seeds missing demo data for deployment reliability.
+- Book cover images are resolved client-side from Open Library and cached in the browser, so cover lookup depends on the public Open Library service.
 - Email notifications are a planned bonus item and are not required to run the current product.
 - The app is deployed on Railway as separate web, API, and PostgreSQL services.
 
