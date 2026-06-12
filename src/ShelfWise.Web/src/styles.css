@@ -145,20 +145,28 @@ select:focus {
   grid-template-columns: 320px minmax(0, 1fr);
 }
 
+.side-panel {
+  display: grid;
+  gap: 14px;
+}
+
 .book-form,
+.user-form,
 .book-table-panel {
   background: #ffffff;
   border: 1px solid #dce2e8;
   border-radius: 8px;
 }
 
-.book-form {
+.book-form,
+.user-form {
   display: grid;
   gap: 14px;
   padding: 18px;
 }
 
-.book-form h2 {
+.book-form h2,
+.user-form h2 {
   font-size: 18px;
   margin: 0;
 }

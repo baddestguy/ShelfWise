@@ -9,6 +9,11 @@ const emptyBook = {
   totalCopies: 1
 }
 
+const emptyUser = {
+  firstName: '',
+  lastName: ''
+}
+
 async function request(path, options = {}, role = 'Patron') {
   const response = await fetch(path, {
     headers: { 'Content-Type': 'application/json', 'X-User-Role': role, ...(options.headers || {}) },
@@ -39,9 +44,11 @@ export default function App() {
   const [search, setSearch] = useState('')
   const [selectedUserId, setSelectedUserId] = useState('')
   const [form, setForm] = useState(emptyBook)
+  const [userForm, setUserForm] = useState(emptyUser)
   const [editingId, setEditingId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingUser, setSavingUser] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
@@ -51,6 +58,7 @@ export default function App() {
   }, [selectedUserId, users])
   const canManageBooks = role === 'Librarian' || role === 'Admin'
   const canDeleteBooks = role === 'Admin'
+  const canCreateUsers = role === 'Admin'
 
   async function loadBooks(nextSearch = search) {
     const query = nextSearch.trim()
@@ -95,6 +103,10 @@ export default function App() {
 
   function updateForm(field, value) {
     setForm(current => ({ ...current, [field]: value }))
+  }
+
+  function updateUserForm(field, value) {
+    setUserForm(current => ({ ...current, [field]: value }))
   }
 
   function resetForm() {
@@ -147,6 +159,34 @@ export default function App() {
       setError(err.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function createUser(event) {
+    event.preventDefault()
+    setSavingUser(true)
+    setError('')
+    setMessage('')
+
+    const payload = {
+      firstName: userForm.firstName.trim(),
+      lastName: userForm.lastName.trim()
+    }
+
+    try {
+      const created = await request('/api/users', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      }, role)
+      const nextUsers = await request('/api/users', {}, role)
+      setUsers(nextUsers)
+      setSelectedUserId(String(created.id))
+      setUserForm(emptyUser)
+      setMessage(`User created: ${created.firstName} ${created.lastName}.`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingUser(false)
     }
   }
 
@@ -255,45 +295,63 @@ export default function App() {
       )}
 
       <section className="workspace">
-        <form className="book-form" onSubmit={saveBook}>
-          <h2>{editingId ? 'Edit Book' : 'Add Book'}</h2>
-          <label>
-            Title
-            <input value={form.title} onChange={event => updateForm('title', event.target.value)} required />
-          </label>
-          <label>
-            Author
-            <input value={form.author} onChange={event => updateForm('author', event.target.value)} required />
-          </label>
-          <div className="form-row">
+        <aside className="side-panel">
+          <form className="book-form" onSubmit={saveBook}>
+            <h2>{editingId ? 'Edit Book' : 'Add Book'}</h2>
             <label>
-              Category
-              <select value={form.category} onChange={event => updateForm('category', event.target.value)}>
-                <option value="NonFiction">NonFiction</option>
-                <option value="Fiction">Fiction</option>
-              </select>
+              Title
+              <input value={form.title} onChange={event => updateForm('title', event.target.value)} required />
             </label>
             <label>
-              Copies
-              <input
-                type="number"
-                min="0"
-                value={form.totalCopies}
-                onChange={event => updateForm('totalCopies', event.target.value)}
-                required
-              />
+              Author
+              <input value={form.author} onChange={event => updateForm('author', event.target.value)} required />
             </label>
-          </div>
-          <label>
-            Genre
-            <input value={form.genre} onChange={event => updateForm('genre', event.target.value)} />
-          </label>
-          <div className="form-actions">
-            <button type="submit" disabled={saving || !canManageBooks}>{saving ? 'Saving...' : editingId ? 'Save Changes' : 'Add Book'}</button>
-            {editingId && <button type="button" className="secondary" onClick={resetForm}>Cancel</button>}
-          </div>
-          {!canManageBooks && <p className="permission-note">Switch to Librarian or Admin to manage books.</p>}
-        </form>
+            <div className="form-row">
+              <label>
+                Category
+                <select value={form.category} onChange={event => updateForm('category', event.target.value)}>
+                  <option value="NonFiction">NonFiction</option>
+                  <option value="Fiction">Fiction</option>
+                </select>
+              </label>
+              <label>
+                Copies
+                <input
+                  type="number"
+                  min="0"
+                  value={form.totalCopies}
+                  onChange={event => updateForm('totalCopies', event.target.value)}
+                  required
+                />
+              </label>
+            </div>
+            <label>
+              Genre
+              <input value={form.genre} onChange={event => updateForm('genre', event.target.value)} />
+            </label>
+            <div className="form-actions">
+              <button type="submit" disabled={saving || !canManageBooks}>{saving ? 'Saving...' : editingId ? 'Save Changes' : 'Add Book'}</button>
+              {editingId && <button type="button" className="secondary" onClick={resetForm}>Cancel</button>}
+            </div>
+            {!canManageBooks && <p className="permission-note">Switch to Librarian or Admin to manage books.</p>}
+          </form>
+
+          <form className="user-form" onSubmit={createUser}>
+            <h2>Add User</h2>
+            <label>
+              First name
+              <input value={userForm.firstName} onChange={event => updateUserForm('firstName', event.target.value)} required />
+            </label>
+            <label>
+              Last name
+              <input value={userForm.lastName} onChange={event => updateUserForm('lastName', event.target.value)} required />
+            </label>
+            <button type="submit" disabled={savingUser || !canCreateUsers}>
+              {savingUser ? 'Creating...' : 'Create User'}
+            </button>
+            {!canCreateUsers && <p className="permission-note">Switch to Admin to create users.</p>}
+          </form>
+        </aside>
 
         <section className="book-table-panel">
           {loading ? (
