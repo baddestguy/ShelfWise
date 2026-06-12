@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using ShelfWise.Api.Auth;
+using ShelfWise.Api.Services;
 using ShelfWise.Repository.Data;
 using ShelfWise.Repository.Repositories;
 using ShelfWise.Services.Services;
@@ -30,6 +31,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // register repository and service implementations
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddHttpClient<IAiBookSearchService, AiBookSearchService>();
 
 var app = builder.Build();
 

@@ -42,6 +42,8 @@ export default function App() {
   const [users, setUsers] = useState([])
   const [role, setRole] = useState('Librarian')
   const [search, setSearch] = useState('')
+  const [aiQuery, setAiQuery] = useState('')
+  const [aiResult, setAiResult] = useState(null)
   const [circulation, setCirculation] = useState(null)
   const [circulationUserId, setCirculationUserId] = useState('')
   const [form, setForm] = useState(emptyBook)
@@ -49,6 +51,7 @@ export default function App() {
   const [editingId, setEditingId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [aiSearching, setAiSearching] = useState(false)
   const [savingUser, setSavingUser] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -190,6 +193,25 @@ export default function App() {
     }
   }
 
+  async function runAiSearch(event) {
+    event.preventDefault()
+    setAiSearching(true)
+    setError('')
+    setMessage('')
+
+    try {
+      const result = await request('/api/ai/book-search', {
+        method: 'POST',
+        body: JSON.stringify({ query: aiQuery.trim() })
+      }, role)
+      setAiResult(result)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAiSearching(false)
+    }
+  }
+
   async function deleteBook(book) {
     if (!window.confirm(`Delete "${book.title}"?`)) return
     setError('')
@@ -288,6 +310,37 @@ export default function App() {
 
       <section className="workspace">
         <aside className="side-panel">
+          <form className="ai-form" onSubmit={runAiSearch}>
+            <h2>AI Librarian</h2>
+            <label>
+              Ask for a recommendation
+              <textarea
+                value={aiQuery}
+                onChange={event => setAiQuery(event.target.value)}
+                placeholder="I want practical books about writing better software"
+                required
+              />
+            </label>
+            <button type="submit" disabled={aiSearching || aiQuery.trim().length === 0}>
+              {aiSearching ? 'Searching...' : 'Find Matches'}
+            </button>
+            {aiResult && (
+              <div className="ai-results">
+                <p className="ai-mode">{aiResult.mode}</p>
+                <p>{aiResult.summary}</p>
+                <ol>
+                  {aiResult.matches.map(match => (
+                    <li key={match.book.id}>
+                      <strong>{match.book.title}</strong>
+                      <span>{match.book.author} · Score {match.score}</span>
+                      <p>{match.reason}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </form>
+
           {canManageBooks ? (
             <form className="book-form" onSubmit={saveBook}>
               <h2>{editingId ? 'Edit Book' : 'Add Book'}</h2>

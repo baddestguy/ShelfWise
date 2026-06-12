@@ -11,6 +11,7 @@ ShelfWise is a library management app built with an ASP.NET Core API, PostgreSQL
 - Role-based demo authentication using `X-User-Role`.
 - React dashboard for search, inventory, circulation, user selection, and role switching.
 - In-memory cache for book inventory and search responses, invalidated after mutations.
+- AI Librarian semantic search using OpenAI embeddings when `OPENAI_API_KEY` is configured, with a local fallback when it is not.
 - Docker Compose setup for the API, web app, and PostgreSQL database.
 
 ## Tech Stack
@@ -39,6 +40,23 @@ Open:
 - API users endpoint: http://localhost:5000/api/users
 
 The API applies database setup on startup and seeds sample books/users in Development or when `SEED_DB=true`.
+
+Optional AI configuration:
+
+Create a `.env` file in the repository root:
+
+```env
+OPENAI_API_KEY=your_api_key
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+```
+
+Then run:
+
+```bash
+docker compose up --build
+```
+
+If `OPENAI_API_KEY` is not set, the AI Librarian still works with local keyword scoring and reports fallback mode in the response/UI.
 
 To reset local data:
 
@@ -148,11 +166,20 @@ curl -X POST http://localhost:5000/api/books/1/checkin \
   -d "{\"userId\":1}"
 ```
 
+AI Librarian semantic search:
+
+```bash
+curl -X POST http://localhost:5000/api/ai/book-search \
+  -H "Content-Type: application/json" \
+  -d "{\"query\":\"I want practical books about writing better software\"}"
+```
+
 ## Architecture
 
 The solution is split into small projects:
 
 - `ShelfWise.Api`: HTTP controllers, auth setup, dependency injection, startup.
+- `ShelfWise.Api/Services`: AI Librarian semantic search using OpenAI embeddings with fallback keyword scoring.
 - `ShelfWise.Domain`: domain models.
 - `ShelfWise.Repository`: EF Core DbContext, schema initialization, repositories.
 - `ShelfWise.Services`: business logic, cache behavior, circulation rules.
@@ -162,11 +189,11 @@ The solution is split into small projects:
 
 - Authentication uses a demo header scheme rather than real SSO. The authorization policies are intentionally structured so a real SSO/JWT provider can replace the demo handler later.
 - The local database setup includes deterministic schema creation for demo reliability.
-- Email notifications and AI features are planned bonus items and are not required to run the current product.
+- Email notifications are a planned bonus item and are not required to run the current product.
 
 ## Planned Enhancements
 
 - Real SSO through OpenID Connect/JWT.
-- Semantic AI search or recommendations using embeddings.
+- Persisted/vector-indexed embeddings for larger catalogs.
 - Overdue notification worker for past-due loans.
 - Deployment URL for live testing.
