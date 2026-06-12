@@ -112,6 +112,49 @@ body {
   gap: 14px;
 }
 
+.shelfwise-app .login-form {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, 1fr) auto;
+}
+
+.shelfwise-app .login-form label {
+  display: grid;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.shelfwise-app .login-form input {
+  min-height: 42px;
+}
+
+.shelfwise-app .session-card {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.shelfwise-app .session-card span,
+.shelfwise-app .session-card strong {
+  font-family: var(--font-display);
+  font-size: 12px;
+}
+
+.shelfwise-app .session-card strong {
+  background: color-mix(in oklab, var(--color-brass) 16%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-brass) 42%, transparent);
+  border-radius: 999px;
+  color: var(--color-brass-deep);
+  padding: 6px 10px;
+  text-transform: uppercase;
+}
+
 /* ---------- shared form atoms ---------- */
 .shelfwise-app .role-picker,
 .shelfwise-app .search-field,
@@ -843,6 +886,8 @@ body {
   .shelfwise-app .toolbar { align-items: stretch; flex-direction: column; }
   .shelfwise-app .action-bar { align-items: stretch; flex-direction: column; }
   .shelfwise-app .header-controls { align-items: stretch; flex-direction: column; }
+  .shelfwise-app .login-form { grid-template-columns: 1fr; }
+  .shelfwise-app .session-card { align-items: stretch; flex-direction: column; }
   .shelfwise-app .pagination { align-items: stretch; flex-direction: column; }
   .shelfwise-app .book-detail-layout { grid-template-columns: 1fr; }
   .shelfwise-app .book-cover-placeholder,

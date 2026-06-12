@@ -20,7 +20,7 @@ namespace ShelfWise.Api.Controllers
 
         [HttpGet]
         [Authorize(Policy = "LibrarianOrAdmin")]
-        public async Task<ActionResult<IEnumerable<User>>> GetAll(CancellationToken ct)
+        public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetAll(CancellationToken ct)
         {
             var users = await _db.Users
                 .AsNoTracking()
@@ -28,12 +28,12 @@ namespace ShelfWise.Api.Controllers
                 .ThenBy(u => u.FirstName)
                 .ToListAsync(ct);
 
-            return Ok(users);
+            return Ok(users.Select(UserResponseDto.FromUser));
         }
 
         [HttpGet("{id:int}")]
         [Authorize(Policy = "LibrarianOrAdmin")]
-        public async Task<ActionResult<User>> GetById(int id, CancellationToken ct)
+        public async Task<ActionResult<UserResponseDto>> GetById(int id, CancellationToken ct)
         {
             var user = await _db.Users
                 .AsNoTracking()
@@ -41,7 +41,7 @@ namespace ShelfWise.Api.Controllers
 
             if (user == null) return NotFound();
 
-            return Ok(user);
+            return Ok(UserResponseDto.FromUser(user));
         }
 
         [HttpPost]
@@ -59,7 +59,7 @@ namespace ShelfWise.Api.Controllers
             var user = new User { FirstName = firstName, LastName = lastName };
             _db.Users.Add(user);
             await _db.SaveChangesAsync(ct);
-            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetById), new { id = user.Id }, UserResponseDto.FromUser(user));
         }
     }
 }

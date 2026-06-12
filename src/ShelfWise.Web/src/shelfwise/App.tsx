@@ -10,7 +10,7 @@ import { Notice } from './components/Notice'
 import { PermissionCard } from './components/PermissionCard'
 import { SearchToolbar } from './components/SearchToolbar'
 import { UserForm } from './components/UserForm'
-import type { AiBookSearchResult, Book, BookFormState, CirculationMode, CirculationState, Role, User, UserFormState } from './types'
+import type { AiBookSearchResult, AuthUser, Book, BookFormState, CirculationMode, CirculationState, LoginResponse, Role, User, UserFormState } from './types'
 import './styles.css'
 
 const emptyBook: BookFormState = {
@@ -29,7 +29,10 @@ const emptyUser: UserFormState = {
 export default function App() {
   const [books, setBooks] = useState<Book[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [role, setRole] = useState<Role>('Patron')
+  const [authUser, setAuthUser] = useState<AuthUser | null>(() => readStoredAuth()?.user ?? null)
+  const [authToken, setAuthToken] = useState<string>(() => readStoredAuth()?.token ?? '')
+  const [loginUsername, setLoginUsername] = useState('patron@shelfwise.dev')
+  const [loginPassword, setLoginPassword] = useState('Password123!')
   const [search, setSearch] = useState('')
   const [aiQuery, setAiQuery] = useState('')
   const [aiResult, setAiResult] = useState<AiBookSearchResult | null>(null)
@@ -45,6 +48,7 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [aiSearching, setAiSearching] = useState(false)
+  const [loggingIn, setLoggingIn] = useState(false)
   const [savingUser, setSavingUser] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -54,13 +58,14 @@ export default function App() {
     const selected = users.find(user => String(user.id) === String(circulationUserId))
     return selected ? `${selected.firstName} ${selected.lastName}` : ''
   }, [circulationUserId, users])
+  const role: Role = authUser?.role ?? 'Patron'
   const canManageBooks = role === 'Librarian' || role === 'Admin'
   const canDeleteBooks = role === 'Admin'
   const canCreateUsers = role === 'Admin'
 
   async function loadBooks(nextSearch = search) {
     const query = nextSearch.trim()
-    const data = await request<Book[]>(`/api/books${query ? `?search=${encodeURIComponent(query)}` : ''}`, {}, role)
+    const data = await request<Book[]>(`/api/books${query ? `?search=${encodeURIComponent(query)}` : ''}`, {}, authToken)
     setBooks(data)
   }
 
@@ -68,9 +73,9 @@ export default function App() {
     setLoading(true)
     setError('')
     try {
-      const bookData = await request<Book[]>('/api/books', {}, role)
+      const bookData = await request<Book[]>('/api/books', {}, authToken)
       const userData = canManageBooks
-        ? await request<User[]>('/api/users', {}, role)
+        ? await request<User[]>('/api/users', {}, authToken)
         : []
 
       setBooks(bookData)
@@ -85,7 +90,7 @@ export default function App() {
   useEffect(() => {
     loadInitialData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role])
+  }, [role, authToken])
 
   useEffect(() => {
     if (!canManageBooks) resetForm()
@@ -184,13 +189,13 @@ export default function App() {
         await request<null>(`/api/books/${editingId}`, {
           method: 'PATCH',
           body: JSON.stringify(payload)
-        }, role)
+        }, authToken)
         setMessage('Book updated.')
       } else {
         await request<Book>('/api/books', {
           method: 'POST',
           body: JSON.stringify(payload)
-        }, role)
+        }, authToken)
         setMessage('Book added.')
       }
       const detailsId = returnToDetailsId
@@ -200,7 +205,7 @@ export default function App() {
       setBookModalOpen(false)
       await loadBooks()
       if (detailsId) {
-        const refreshed = await request<Book>(`/api/books/${detailsId}`, {}, role)
+        const refreshed = await request<Book>(`/api/books/${detailsId}`, {}, authToken)
         setSelectedBook(refreshed)
       }
     } catch (err) {
@@ -225,8 +230,8 @@ export default function App() {
       const created = await request<User>('/api/users', {
         method: 'POST',
         body: JSON.stringify(payload)
-      }, role)
-      const nextUsers = await request<User[]>('/api/users', {}, role)
+      }, authToken)
+      const nextUsers = await request<User[]>('/api/users', {}, authToken)
       setUsers(nextUsers)
       closeUserModal()
       setMessage(`User created: ${created.firstName} ${created.lastName}.`)
@@ -247,7 +252,7 @@ export default function App() {
       const result = await request<AiBookSearchResult>('/api/ai/book-search', {
         method: 'POST',
         body: JSON.stringify({ query: aiQuery.trim() })
-      }, role)
+      }, authToken)
       setAiResult(result)
     } catch (err) {
       setError(toErrorMessage(err))
@@ -263,7 +268,7 @@ export default function App() {
     setSelectedBook(null)
 
     try {
-      await request<null>(`/api/books/${book.id}`, { method: 'DELETE' }, role)
+      await request<null>(`/api/books/${book.id}`, { method: 'DELETE' }, authToken)
       setMessage('Book deleted.')
       await loadBooks()
     } catch (err) {
@@ -307,7 +312,7 @@ export default function App() {
       await request<null>(`/api/books/${circulation.book.id}/${action}`, {
         method: 'POST',
         body: JSON.stringify(payload)
-      }, role)
+      }, authToken)
       const verb = circulation.mode === 'checkout' ? 'Checked out' : 'Checked in'
       const suffix = circulation.mode === 'checkout' ? ` to ${circulationUserName}` : ` from ${circulationUserName}`
       setMessage(`${verb} "${circulation.book.title}"${suffix}.`)
@@ -318,9 +323,53 @@ export default function App() {
     }
   }
 
+  async function login(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setLoggingIn(true)
+    setError('')
+    setMessage('')
+
+    try {
+      const result = await request<LoginResponse>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: loginUsername,
+          password: loginPassword
+        })
+      })
+      setAuthUser(result.user)
+      setAuthToken(result.token)
+      window.localStorage.setItem('shelfwise-auth', JSON.stringify(result))
+      setMessage(`Signed in as ${result.user.role}.`)
+    } catch (err) {
+      setError(toErrorMessage(err))
+    } finally {
+      setLoggingIn(false)
+    }
+  }
+
+  function logout() {
+    window.localStorage.removeItem('shelfwise-auth')
+    setAuthUser(null)
+    setAuthToken('')
+    setUsers([])
+    setSelectedBook(null)
+    setMessage('Signed out.')
+  }
+
   return (
     <main className="app-shell">
-      <Header bookCount={books.length} role={role} onRoleChange={setRole} />
+      <Header
+        bookCount={books.length}
+        user={authUser}
+        username={loginUsername}
+        password={loginPassword}
+        loggingIn={loggingIn}
+        onUsernameChange={setLoginUsername}
+        onPasswordChange={setLoginPassword}
+        onLogin={login}
+        onLogout={logout}
+      />
       <SearchToolbar search={search} onSearchChange={setSearch} />
       {(canManageBooks || canCreateUsers) && (
         <section className="action-bar" aria-label="Management actions">
@@ -404,4 +453,13 @@ export default function App() {
 
 function toErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Something went wrong.'
+}
+
+function readStoredAuth(): LoginResponse | null {
+  try {
+    const raw = window.localStorage.getItem('shelfwise-auth')
+    return raw ? JSON.parse(raw) as LoginResponse : null
+  } catch {
+    return null
+  }
 }

@@ -28,6 +28,21 @@ export type User = {
   id: number
   firstName: string
   lastName: string
+  username?: string
+  role?: Role
+}
+
+export type AuthUser = {
+  id: number
+  firstName: string
+  lastName: string
+  username: string
+  role: Role
+}
+
+export type LoginResponse = {
+  token: string
+  user: AuthUser
 }
 
 export type AiBookMatch = {

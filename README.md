@@ -13,7 +13,7 @@ ShelfWise is a library management app built with an ASP.NET Core API, PostgreSQL
 - Inventory tracking: total copies, checked-out copies, and available copies.
 - Circulation: check books out to users and check them back in.
 - User management: list users as a Librarian/Admin and create users as an Admin.
-- Role-based demo authentication using `X-User-Role`.
+- JWT authentication with seeded Patron, Librarian, and Admin demo accounts.
 - TypeScript React dashboard for search, inventory, circulation, user selection, and role switching.
 - In-memory cache for book inventory and search responses, invalidated after mutations.
 - AI Librarian semantic search using OpenAI embeddings when `OPENAI_API_KEY` is configured, with a local fallback when it is not.
@@ -65,6 +65,14 @@ docker compose up --build
 
 If `OPENAI_API_KEY` is not set, the AI Librarian still works with local keyword scoring and reports fallback mode in the response/UI.
 
+Optional JWT configuration:
+
+```env
+JWT_SIGNING_KEY=replace-with-a-long-random-secret-at-least-32-characters
+```
+
+If `JWT_SIGNING_KEY` is not set, the API uses a development-only signing key.
+
 To reset local data:
 
 ```bash
@@ -101,9 +109,15 @@ Run tests:
 dotnet test ShelfWise.sln
 ```
 
-## Demo Auth And Roles
+## Auth And Roles
 
-ShelfWise includes demo role-based authentication through the `X-User-Role` request header. This keeps the app easy to run locally while still demonstrating authorization boundaries.
+ShelfWise uses username/password login with JWT bearer tokens. Passwords are salted and hashed with ASP.NET Core's `PasswordHasher<TUser>`, and the JWT contains the user's role claim for API authorization.
+
+Seeded demo accounts:
+
+- `patron@shelfwise.dev` / `Password123!`
+- `librarian@shelfwise.dev` / `Password123!`
+- `admin@shelfwise.dev` / `Password123!`
 
 Supported roles:
 
@@ -131,10 +145,18 @@ Permissions:
 Example:
 
 ```bash
-curl -H "X-User-Role: Admin" http://localhost:5000/api/users
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d "{\"username\":\"admin@shelfwise.dev\",\"password\":\"Password123!\"}"
 ```
 
-In production, this demo auth scheme would be replaced with OpenID Connect/JWT validation from an SSO provider such as Microsoft Entra ID, Auth0, or Okta while keeping the same authorization policies.
+Protected endpoints require:
+
+```http
+Authorization: Bearer <token>
+```
+
+For production, configure `JWT_SIGNING_KEY` or `Jwt:SigningKey` with a strong secret. A real SSO provider such as Microsoft Entra ID, Auth0, or Okta could replace the login endpoint later while keeping the same authorization policies.
 
 ## API Examples
 
@@ -149,7 +171,7 @@ Create a book:
 ```bash
 curl -X POST http://localhost:5000/api/books \
   -H "Content-Type: application/json" \
-  -H "X-User-Role: Librarian" \
+  -H "Authorization: Bearer <librarian-or-admin-token>" \
   -d "{\"title\":\"Refactoring\",\"author\":\"Martin Fowler\",\"category\":\"NonFiction\",\"genre\":\"Technical\",\"totalCopies\":2}"
 ```
 
@@ -158,7 +180,7 @@ Create a user:
 ```bash
 curl -X POST http://localhost:5000/api/users \
   -H "Content-Type: application/json" \
-  -H "X-User-Role: Admin" \
+  -H "Authorization: Bearer <admin-token>" \
   -d "{\"firstName\":\"Ada\",\"lastName\":\"Lovelace\"}"
 ```
 
@@ -167,7 +189,7 @@ Check out a book:
 ```bash
 curl -X POST http://localhost:5000/api/books/1/checkout \
   -H "Content-Type: application/json" \
-  -H "X-User-Role: Librarian" \
+  -H "Authorization: Bearer <librarian-or-admin-token>" \
   -d "{\"userId\":1,\"dueDays\":14}"
 ```
 
@@ -176,7 +198,7 @@ Check in a book:
 ```bash
 curl -X POST http://localhost:5000/api/books/1/checkin \
   -H "Content-Type: application/json" \
-  -H "X-User-Role: Librarian" \
+  -H "Authorization: Bearer <librarian-or-admin-token>" \
   -d "{\"userId\":1}"
 ```
 

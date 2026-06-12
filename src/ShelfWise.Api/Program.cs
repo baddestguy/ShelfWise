@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Authentication;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using ShelfWise.Api.Auth;
+using Microsoft.IdentityModel.Tokens;
 using ShelfWise.Api.Services;
 using ShelfWise.Repository.Data;
 using ShelfWise.Repository.Repositories;
@@ -12,10 +13,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 builder.Services
-    .AddAuthentication(DemoRoleAuthenticationHandler.SchemeName)
-    .AddScheme<AuthenticationSchemeOptions, DemoRoleAuthenticationHandler>(
-        DemoRoleAuthenticationHandler.SchemeName,
-        options => { });
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var signingKey = JwtTokenService.GetSigningKey(builder.Configuration);
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "ShelfWise",
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"] ?? "ShelfWise",
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(2)
+        };
+    });
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
@@ -31,6 +44,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // register repository and service implementations
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddHttpClient<IAiBookSearchService, AiBookSearchService>();
 
 var app = builder.Build();

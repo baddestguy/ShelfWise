@@ -1,12 +1,28 @@
-import type { Role } from '../types'
+import type { AuthUser } from '../types'
 
 type HeaderProps = {
   bookCount: number
-  role: Role
-  onRoleChange: (role: Role) => void
+  user: AuthUser | null
+  username: string
+  password: string
+  loggingIn: boolean
+  onUsernameChange: (value: string) => void
+  onPasswordChange: (value: string) => void
+  onLogin: (event: React.FormEvent<HTMLFormElement>) => void
+  onLogout: () => void
 }
 
-export function Header({ bookCount, role, onRoleChange }: HeaderProps) {
+export function Header({
+  bookCount,
+  user,
+  username,
+  password,
+  loggingIn,
+  onUsernameChange,
+  onPasswordChange,
+  onLogin,
+  onLogout
+}: HeaderProps) {
   return (
     <header className="topbar">
       <div>
@@ -14,14 +30,24 @@ export function Header({ bookCount, role, onRoleChange }: HeaderProps) {
         <p>{bookCount} books in view</p>
       </div>
       <div className="header-controls">
-        <label className="role-picker">
-          Role
-          <select value={role} onChange={event => onRoleChange(event.target.value as Role)}>
-            <option value="Patron">Patron</option>
-            <option value="Librarian">Librarian</option>
-            <option value="Admin">Admin</option>
-          </select>
-        </label>
+        {user ? (
+          <div className="session-card">
+            <strong>{user.role}</strong>
+            <button type="button" className="secondary" onClick={onLogout}>Log Out</button>
+          </div>
+        ) : (
+          <form className="login-form" onSubmit={onLogin}>
+            <label>
+              Username
+              <input value={username} onChange={event => onUsernameChange(event.target.value)} placeholder="patron@shelfwise.dev" required />
+            </label>
+            <label>
+              Password
+              <input type="password" value={password} onChange={event => onPasswordChange(event.target.value)} placeholder="Password123!" required />
+            </label>
+            <button type="submit" disabled={loggingIn}>{loggingIn ? 'Signing In...' : 'Sign In'}</button>
+          </form>
+        )}
       </div>
     </header>
   )
