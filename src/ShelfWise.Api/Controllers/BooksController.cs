@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShelfWise.Api.Models;
 using ShelfWise.Domain.Models;
@@ -19,6 +20,7 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpPost("{id}/checkout")]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Checkout(int id, [FromBody] CheckoutRequestDto dto, CancellationToken ct)
         {
             var ok = await _service.CheckOutAsync(id, dto.UserId, dto.DueDays, ct);
@@ -27,6 +29,7 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpPost("{id}/checkin")]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Checkin(int id, [FromBody] CheckinRequestDto dto, CancellationToken ct)
         {
             var ok = await _service.CheckInAsync(id, dto.UserId, ct);
@@ -35,6 +38,7 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpPost("{id}/hold")]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> PlaceHold(int id, [FromBody] HoldRequestDto dto, CancellationToken ct)
         {
             var holdId = await _service.PlaceHoldAsync(id, dto.UserId, ct);
@@ -49,6 +53,7 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Create([FromBody] CreateBookDto dto, CancellationToken ct)
         {
             if (!ModelState.IsValid)
@@ -85,6 +90,7 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpPatch("{id:int}")]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateBookDto dto, CancellationToken ct)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -109,6 +115,7 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
             var ok = await _service.DeleteAsync(id, ct);

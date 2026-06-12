@@ -9,9 +9,9 @@ const emptyBook = {
   totalCopies: 1
 }
 
-async function request(path, options = {}) {
+async function request(path, options = {}, role = 'Patron') {
   const response = await fetch(path, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: { 'Content-Type': 'application/json', 'X-User-Role': role, ...(options.headers || {}) },
     ...options
   })
 
@@ -35,6 +35,7 @@ async function request(path, options = {}) {
 export default function App() {
   const [books, setBooks] = useState([])
   const [users, setUsers] = useState([])
+  const [role, setRole] = useState('Librarian')
   const [search, setSearch] = useState('')
   const [selectedUserId, setSelectedUserId] = useState('')
   const [form, setForm] = useState(emptyBook)
@@ -48,10 +49,12 @@ export default function App() {
     const selected = users.find(user => String(user.id) === String(selectedUserId))
     return selected ? `${selected.firstName} ${selected.lastName}` : ''
   }, [selectedUserId, users])
+  const canManageBooks = role === 'Librarian' || role === 'Admin'
+  const canDeleteBooks = role === 'Admin'
 
   async function loadBooks(nextSearch = search) {
     const query = nextSearch.trim()
-    const data = await request(`/api/books${query ? `?search=${encodeURIComponent(query)}` : ''}`)
+    const data = await request(`/api/books${query ? `?search=${encodeURIComponent(query)}` : ''}`, {}, role)
     setBooks(data)
   }
 
@@ -60,8 +63,8 @@ export default function App() {
     setError('')
     try {
       const [bookData, userData] = await Promise.all([
-        request('/api/books'),
-        request('/api/users')
+        request('/api/books', {}, role),
+        request('/api/users', {}, role)
       ])
       setBooks(bookData)
       setUsers(userData)
@@ -75,7 +78,7 @@ export default function App() {
 
   useEffect(() => {
     loadInitialData()
-  }, [])
+  }, [role])
 
   useEffect(() => {
     const handle = window.setTimeout(async () => {
@@ -129,13 +132,13 @@ export default function App() {
         await request(`/api/books/${editingId}`, {
           method: 'PATCH',
           body: JSON.stringify(payload)
-        })
+        }, role)
         setMessage('Book updated.')
       } else {
         await request('/api/books', {
           method: 'POST',
           body: JSON.stringify(payload)
-        })
+        }, role)
         setMessage('Book added.')
       }
       resetForm()
@@ -153,7 +156,7 @@ export default function App() {
     setMessage('')
 
     try {
-      await request(`/api/books/${book.id}`, { method: 'DELETE' })
+      await request(`/api/books/${book.id}`, { method: 'DELETE' }, role)
       setMessage('Book deleted.')
       await loadBooks()
     } catch (err) {
@@ -173,7 +176,7 @@ export default function App() {
       await request(`/api/books/${book.id}/checkout`, {
         method: 'POST',
         body: JSON.stringify({ userId: Number(selectedUserId), dueDays: 14 })
-      })
+      }, role)
       setMessage(`Checked out "${book.title}" to ${selectedUserName}.`)
       await loadBooks()
     } catch (err) {
@@ -193,7 +196,7 @@ export default function App() {
       await request(`/api/books/${book.id}/checkin`, {
         method: 'POST',
         body: JSON.stringify({ userId: Number(selectedUserId) })
-      })
+      }, role)
       setMessage(`Checked in "${book.title}".`)
       await loadBooks()
     } catch (err) {
@@ -208,17 +211,27 @@ export default function App() {
           <h1>ShelfWise</h1>
           <p>{books.length} books in view</p>
         </div>
-        <label className="user-picker">
-          Active user
-          <select value={selectedUserId} onChange={event => setSelectedUserId(event.target.value)}>
-            {users.length === 0 && <option value="">No users</option>}
-            {users.map(user => (
-              <option key={user.id} value={user.id}>
-                {user.firstName} {user.lastName}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="header-controls">
+          <label className="role-picker">
+            Role
+            <select value={role} onChange={event => setRole(event.target.value)}>
+              <option value="Patron">Patron</option>
+              <option value="Librarian">Librarian</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </label>
+          <label className="user-picker">
+            Active user
+            <select value={selectedUserId} onChange={event => setSelectedUserId(event.target.value)}>
+              {users.length === 0 && <option value="">No users</option>}
+              {users.map(user => (
+                <option key={user.id} value={user.id}>
+                  {user.firstName} {user.lastName}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </header>
 
       <section className="toolbar">
@@ -276,9 +289,10 @@ export default function App() {
             <input value={form.genre} onChange={event => updateForm('genre', event.target.value)} />
           </label>
           <div className="form-actions">
-            <button type="submit" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Save Changes' : 'Add Book'}</button>
+            <button type="submit" disabled={saving || !canManageBooks}>{saving ? 'Saving...' : editingId ? 'Save Changes' : 'Add Book'}</button>
             {editingId && <button type="button" className="secondary" onClick={resetForm}>Cancel</button>}
           </div>
+          {!canManageBooks && <p className="permission-note">Switch to Librarian or Admin to manage books.</p>}
         </form>
 
         <section className="book-table-panel">
@@ -316,14 +330,14 @@ export default function App() {
                     </td>
                     <td>
                       <div className="row-actions">
-                        <button type="button" className="secondary" onClick={() => editBook(book)}>Edit</button>
-                        <button type="button" disabled={book.availableCopies <= 0} onClick={() => checkoutBook(book)}>
+                        <button type="button" className="secondary" disabled={!canManageBooks} onClick={() => editBook(book)}>Edit</button>
+                        <button type="button" disabled={!canManageBooks || book.availableCopies <= 0} onClick={() => checkoutBook(book)}>
                           Check Out
                         </button>
-                        <button type="button" className="secondary" disabled={book.checkedOutCopies <= 0} onClick={() => checkinBook(book)}>
+                        <button type="button" className="secondary" disabled={!canManageBooks || book.checkedOutCopies <= 0} onClick={() => checkinBook(book)}>
                           Check In
                         </button>
-                        <button type="button" className="danger" onClick={() => deleteBook(book)}>Delete</button>
+                        <button type="button" className="danger" disabled={!canDeleteBooks} onClick={() => deleteBook(book)}>Delete</button>
                       </div>
                     </td>
                   </tr>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShelfWise.Domain.Models;
@@ -42,6 +43,7 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create([FromBody] CreateUserDto dto, CancellationToken ct)
         {
             var firstName = dto.FirstName.Trim();

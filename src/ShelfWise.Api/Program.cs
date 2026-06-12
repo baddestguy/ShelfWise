@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using ShelfWise.Api.Auth;
 using ShelfWise.Repository.Data;
 using ShelfWise.Repository.Repositories;
 using ShelfWise.Services.Services;
@@ -8,6 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
+builder.Services
+    .AddAuthentication(DemoRoleAuthenticationHandler.SchemeName)
+    .AddScheme<AuthenticationSchemeOptions, DemoRoleAuthenticationHandler>(
+        DemoRoleAuthenticationHandler.SchemeName,
+        options => { });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("LibrarianOrAdmin", policy => policy.RequireRole("Librarian", "Admin"));
+});
 
 // Add DbContext (connection string placed in appsettings in later step)
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -68,6 +80,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
