@@ -24,7 +24,7 @@ namespace ShelfWise.Api.Controllers
         public async Task<IActionResult> Checkout(int id, [FromBody] CheckoutRequestDto dto, CancellationToken ct)
         {
             var ok = await _service.CheckOutAsync(id, dto.UserId, dto.DueDays, ct);
-            if (!ok) return BadRequest(new { message = "No copies available" });
+            if (!ok) return BadRequest(new { message = "No copies available, or this user already has this book checked out." });
             return Ok();
         }
 

@@ -102,6 +102,12 @@ namespace ShelfWise.Services.Services
 
         public async Task<bool> CheckOutAsync(int bookId, int userId, int dueDays = 14, CancellationToken ct = default)
         {
+            var activeBorrow = await _repo.GetActiveBorrowRecordAsync(bookId, userId, ct);
+            if (activeBorrow != null)
+            {
+                return false;
+            }
+
             var total = await _repo.GetTotalCopiesAsync(bookId, ct);
             var checkedOutCount = await _repo.GetCheckedOutCountAsync(bookId, ct);
             if (checkedOutCount >= total)

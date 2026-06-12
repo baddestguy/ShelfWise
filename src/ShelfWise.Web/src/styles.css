@@ -75,9 +75,10 @@ button.danger {
 }
 
 .role-picker,
-.user-picker,
 .search-field,
-.book-form label {
+.book-form label,
+.user-form label,
+.modal label {
   color: #52616f;
   display: grid;
   font-size: 13px;
@@ -87,10 +88,6 @@ button.danger {
 
 .role-picker select {
   min-width: 150px;
-}
-
-.user-picker select {
-  min-width: 220px;
 }
 
 .toolbar {
@@ -152,6 +149,7 @@ select:focus {
 
 .book-form,
 .user-form,
+.permission-card,
 .book-table-panel {
   background: #ffffff;
   border: 1px solid #dce2e8;
@@ -159,15 +157,24 @@ select:focus {
 }
 
 .book-form,
-.user-form {
+.user-form,
+.permission-card {
   display: grid;
   gap: 14px;
   padding: 18px;
 }
 
 .book-form h2,
-.user-form h2 {
+.user-form h2,
+.permission-card h2 {
   font-size: 18px;
+  margin: 0;
+}
+
+.permission-card p {
+  color: #617080;
+  font-weight: 700;
+  line-height: 1.45;
   margin: 0;
 }
 
@@ -253,6 +260,52 @@ th {
   color: #617080;
   font-weight: 700;
   padding: 28px;
+}
+
+.modal-backdrop {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.48);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 18px;
+  position: fixed;
+  z-index: 10;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  max-width: 420px;
+  padding: 20px;
+  width: 100%;
+}
+
+.modal h2 {
+  font-size: 20px;
+  margin: 0 0 6px;
+}
+
+.modal p {
+  color: #52616f;
+  font-weight: 700;
+  margin: 0;
+}
+
+.modal-error {
+  background: #fdecea;
+  border-radius: 6px;
+  color: #9f1c13;
+  font-weight: 700;
+  padding: 10px 12px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 @media (max-width: 900px) {

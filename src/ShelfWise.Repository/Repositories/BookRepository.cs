@@ -114,6 +114,12 @@ namespace ShelfWise.Repository.Repositories
             var checkedOut = await GetCheckedOutCountAsync(bookId, ct);
             var book = await _db.Books.FindAsync(new object[] { bookId }, ct);
             if (book == null) return false;
+
+            var alreadyCheckedOutToUser = await _db.BorrowRecords.AnyAsync(
+                b => b.BookId == bookId && b.UserId == userId && b.ReturnedAt == null,
+                ct);
+            if (alreadyCheckedOutToUser) return false;
+
             if (checkedOut >= book.TotalCopies)
             {
                 // no copies available

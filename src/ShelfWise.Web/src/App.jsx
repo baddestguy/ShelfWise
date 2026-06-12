@@ -42,7 +42,8 @@ export default function App() {
   const [users, setUsers] = useState([])
   const [role, setRole] = useState('Librarian')
   const [search, setSearch] = useState('')
-  const [selectedUserId, setSelectedUserId] = useState('')
+  const [circulation, setCirculation] = useState(null)
+  const [circulationUserId, setCirculationUserId] = useState('')
   const [form, setForm] = useState(emptyBook)
   const [userForm, setUserForm] = useState(emptyUser)
   const [editingId, setEditingId] = useState(null)
@@ -51,11 +52,12 @@ export default function App() {
   const [savingUser, setSavingUser] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [modalError, setModalError] = useState('')
 
-  const selectedUserName = useMemo(() => {
-    const selected = users.find(user => String(user.id) === String(selectedUserId))
+  const circulationUserName = useMemo(() => {
+    const selected = users.find(user => String(user.id) === String(circulationUserId))
     return selected ? `${selected.firstName} ${selected.lastName}` : ''
-  }, [selectedUserId, users])
+  }, [circulationUserId, users])
   const canManageBooks = role === 'Librarian' || role === 'Admin'
   const canDeleteBooks = role === 'Admin'
   const canCreateUsers = role === 'Admin'
@@ -76,7 +78,6 @@ export default function App() {
       ])
       setBooks(bookData)
       setUsers(userData)
-      if (userData.length > 0) setSelectedUserId(String(userData[0].id))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -180,7 +181,6 @@ export default function App() {
       }, role)
       const nextUsers = await request('/api/users', {}, role)
       setUsers(nextUsers)
-      setSelectedUserId(String(created.id))
       setUserForm(emptyUser)
       setMessage(`User created: ${created.firstName} ${created.lastName}.`)
     } catch (err) {
@@ -204,43 +204,49 @@ export default function App() {
     }
   }
 
-  async function checkoutBook(book) {
-    if (!selectedUserId) {
-      setError('Select a user before checking out a book.')
-      return
-    }
-
+  function openCirculationModal(mode, book) {
     setError('')
     setMessage('')
-    try {
-      await request(`/api/books/${book.id}/checkout`, {
-        method: 'POST',
-        body: JSON.stringify({ userId: Number(selectedUserId), dueDays: 14 })
-      }, role)
-      setMessage(`Checked out "${book.title}" to ${selectedUserName}.`)
-      await loadBooks()
-    } catch (err) {
-      setError(err.message)
-    }
+    setModalError('')
+    setCirculation({ mode, book })
+    setCirculationUserId(users.length > 0 ? String(users[0].id) : '')
   }
 
-  async function checkinBook(book) {
-    if (!selectedUserId) {
-      setError('Select a user before checking in a book.')
+  function closeCirculationModal() {
+    setCirculation(null)
+    setCirculationUserId('')
+    setModalError('')
+  }
+
+  async function submitCirculation(event) {
+    event.preventDefault()
+    if (!circulation) return
+    if (!circulationUserId) {
+      setModalError('Select a user first.')
       return
     }
 
     setError('')
     setMessage('')
+    setModalError('')
+
     try {
-      await request(`/api/books/${book.id}/checkin`, {
+      const action = circulation.mode === 'checkout' ? 'checkout' : 'checkin'
+      const payload = circulation.mode === 'checkout'
+        ? { userId: Number(circulationUserId), dueDays: 14 }
+        : { userId: Number(circulationUserId) }
+
+      await request(`/api/books/${circulation.book.id}/${action}`, {
         method: 'POST',
-        body: JSON.stringify({ userId: Number(selectedUserId) })
+        body: JSON.stringify(payload)
       }, role)
-      setMessage(`Checked in "${book.title}".`)
+      const verb = circulation.mode === 'checkout' ? 'Checked out' : 'Checked in'
+      const suffix = circulation.mode === 'checkout' ? ` to ${circulationUserName}` : ` from ${circulationUserName}`
+      setMessage(`${verb} "${circulation.book.title}"${suffix}.`)
+      closeCirculationModal()
       await loadBooks()
     } catch (err) {
-      setError(err.message)
+      setModalError(err.message)
     }
   }
 
@@ -260,17 +266,6 @@ export default function App() {
               <option value="Admin">Admin</option>
             </select>
           </label>
-          <label className="user-picker">
-            Active user
-            <select value={selectedUserId} onChange={event => setSelectedUserId(event.target.value)}>
-              {users.length === 0 && <option value="">No users</option>}
-              {users.map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.firstName} {user.lastName}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
       </header>
 
@@ -283,9 +278,6 @@ export default function App() {
             placeholder="Title, author, genre, category"
           />
         </label>
-        <button type="button" className="secondary" onClick={() => loadInitialData()}>
-          Refresh
-        </button>
       </section>
 
       {(message || error) && (
@@ -296,61 +288,68 @@ export default function App() {
 
       <section className="workspace">
         <aside className="side-panel">
-          <form className="book-form" onSubmit={saveBook}>
-            <h2>{editingId ? 'Edit Book' : 'Add Book'}</h2>
-            <label>
-              Title
-              <input value={form.title} onChange={event => updateForm('title', event.target.value)} required />
-            </label>
-            <label>
-              Author
-              <input value={form.author} onChange={event => updateForm('author', event.target.value)} required />
-            </label>
-            <div className="form-row">
+          {canManageBooks ? (
+            <form className="book-form" onSubmit={saveBook}>
+              <h2>{editingId ? 'Edit Book' : 'Add Book'}</h2>
               <label>
-                Category
-                <select value={form.category} onChange={event => updateForm('category', event.target.value)}>
-                  <option value="NonFiction">NonFiction</option>
-                  <option value="Fiction">Fiction</option>
-                </select>
+                Title
+                <input value={form.title} onChange={event => updateForm('title', event.target.value)} required />
               </label>
               <label>
-                Copies
-                <input
-                  type="number"
-                  min="0"
-                  value={form.totalCopies}
-                  onChange={event => updateForm('totalCopies', event.target.value)}
-                  required
-                />
+                Author
+                <input value={form.author} onChange={event => updateForm('author', event.target.value)} required />
               </label>
-            </div>
-            <label>
-              Genre
-              <input value={form.genre} onChange={event => updateForm('genre', event.target.value)} />
-            </label>
-            <div className="form-actions">
-              <button type="submit" disabled={saving || !canManageBooks}>{saving ? 'Saving...' : editingId ? 'Save Changes' : 'Add Book'}</button>
-              {editingId && <button type="button" className="secondary" onClick={resetForm}>Cancel</button>}
-            </div>
-            {!canManageBooks && <p className="permission-note">Switch to Librarian or Admin to manage books.</p>}
-          </form>
+              <div className="form-row">
+                <label>
+                  Category
+                  <select value={form.category} onChange={event => updateForm('category', event.target.value)}>
+                    <option value="NonFiction">NonFiction</option>
+                    <option value="Fiction">Fiction</option>
+                  </select>
+                </label>
+                <label>
+                  Copies
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.totalCopies}
+                    onChange={event => updateForm('totalCopies', event.target.value)}
+                    required
+                  />
+                </label>
+              </div>
+              <label>
+                Genre
+                <input value={form.genre} onChange={event => updateForm('genre', event.target.value)} />
+              </label>
+              <div className="form-actions">
+                <button type="submit" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Save Changes' : 'Add Book'}</button>
+                {editingId && <button type="button" className="secondary" onClick={resetForm}>Cancel</button>}
+              </div>
+            </form>
+          ) : (
+            <section className="permission-card">
+              <h2>Read Only</h2>
+              <p>Patrons can search and view availability. Switch to Librarian or Admin to manage circulation.</p>
+            </section>
+          )}
 
-          <form className="user-form" onSubmit={createUser}>
-            <h2>Add User</h2>
-            <label>
-              First name
-              <input value={userForm.firstName} onChange={event => updateUserForm('firstName', event.target.value)} required />
-            </label>
-            <label>
-              Last name
-              <input value={userForm.lastName} onChange={event => updateUserForm('lastName', event.target.value)} required />
-            </label>
-            <button type="submit" disabled={savingUser || !canCreateUsers}>
-              {savingUser ? 'Creating...' : 'Create User'}
-            </button>
-            {!canCreateUsers && <p className="permission-note">Switch to Admin to create users.</p>}
-          </form>
+          {canCreateUsers && (
+            <form className="user-form" onSubmit={createUser}>
+              <h2>Add User</h2>
+              <label>
+                First name
+                <input value={userForm.firstName} onChange={event => updateUserForm('firstName', event.target.value)} required />
+              </label>
+              <label>
+                Last name
+                <input value={userForm.lastName} onChange={event => updateUserForm('lastName', event.target.value)} required />
+              </label>
+              <button type="submit" disabled={savingUser}>
+                {savingUser ? 'Creating...' : 'Create User'}
+              </button>
+            </form>
+          )}
         </aside>
 
         <section className="book-table-panel">
@@ -388,14 +387,22 @@ export default function App() {
                     </td>
                     <td>
                       <div className="row-actions">
-                        <button type="button" className="secondary" disabled={!canManageBooks} onClick={() => editBook(book)}>Edit</button>
-                        <button type="button" disabled={!canManageBooks || book.availableCopies <= 0} onClick={() => checkoutBook(book)}>
-                          Check Out
-                        </button>
-                        <button type="button" className="secondary" disabled={!canManageBooks || book.checkedOutCopies <= 0} onClick={() => checkinBook(book)}>
-                          Check In
-                        </button>
-                        <button type="button" className="danger" disabled={!canDeleteBooks} onClick={() => deleteBook(book)}>Delete</button>
+                        {canManageBooks && (
+                          <>
+                            <button type="button" className="secondary" onClick={() => editBook(book)}>Edit</button>
+                            {book.availableCopies > 0 && (
+                              <button type="button" onClick={() => openCirculationModal('checkout', book)}>
+                                Check Out
+                              </button>
+                            )}
+                            {book.checkedOutCopies > 0 && (
+                              <button type="button" className="secondary" onClick={() => openCirculationModal('checkin', book)}>
+                                Check In
+                              </button>
+                            )}
+                          </>
+                        )}
+                        {canDeleteBooks && <button type="button" className="danger" onClick={() => deleteBook(book)}>Delete</button>}
                       </div>
                     </td>
                   </tr>
@@ -405,6 +412,37 @@ export default function App() {
           )}
         </section>
       </section>
+
+      {circulation && (
+        <div className="modal-backdrop" role="presentation">
+          <form className="modal" onSubmit={submitCirculation}>
+            <div>
+              <h2>{circulation.mode === 'checkout' ? 'Check Out Book' : 'Check In Book'}</h2>
+              <p>{circulation.book.title}</p>
+            </div>
+            <label>
+              User
+              <select value={circulationUserId} onChange={event => setCirculationUserId(event.target.value)} required>
+                {users.length === 0 && <option value="">No users available</option>}
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.firstName} {user.lastName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {modalError && <div className="modal-error">{modalError}</div>}
+            <div className="modal-actions">
+              <button type="submit" disabled={users.length === 0}>
+                {circulation.mode === 'checkout' ? 'Check Out' : 'Check In'}
+              </button>
+              <button type="button" className="secondary" onClick={closeCirculationModal}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </main>
   )
 }
