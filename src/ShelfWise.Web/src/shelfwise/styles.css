@@ -674,21 +674,58 @@ body {
   grid-template-columns: 180px minmax(0, 1fr);
 }
 
+.shelfwise-app .book-cover-placeholder,
+.shelfwise-app .book-cover-frame,
+.shelfwise-app .book-cover-image {
+  aspect-ratio: 2 / 3;
+  border-radius: 6px;
+  box-shadow: 0 22px 45px -28px rgba(15,27,61,.75);
+  position: relative;
+  width: 100%;
+}
+
+.shelfwise-app .book-cover-frame {
+  background: var(--color-parchment-deep);
+}
+
 .shelfwise-app .book-cover-placeholder {
   align-items: center;
-  aspect-ratio: 2 / 3;
   background:
     linear-gradient(145deg, color-mix(in oklab, var(--color-ink) 88%, black), var(--color-ink-soft)),
     var(--color-ink);
   border: 1px solid color-mix(in oklab, var(--color-brass) 45%, transparent);
-  border-radius: 6px;
-  box-shadow: 0 22px 45px -28px rgba(15,27,61,.75);
   color: var(--color-brass);
   display: flex;
   font-family: var(--font-display);
   font-size: 72px;
   font-weight: 800;
   justify-content: center;
+}
+
+.shelfwise-app .book-cover-image {
+  background: var(--color-parchment-deep);
+  border: 1px solid color-mix(in oklab, var(--color-ink) 12%, transparent);
+  display: block;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shelfwise-app .cover-spinner {
+  animation: shelfwise-spin .8s linear infinite;
+  border: 3px solid color-mix(in oklab, var(--color-brass) 28%, transparent);
+  border-top-color: var(--color-brass);
+  border-radius: 999px;
+  height: 34px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 34px;
+  z-index: 1;
+}
+
+@keyframes shelfwise-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .shelfwise-app .book-detail-content {
@@ -808,7 +845,9 @@ body {
   .shelfwise-app .header-controls { align-items: stretch; flex-direction: column; }
   .shelfwise-app .pagination { align-items: stretch; flex-direction: column; }
   .shelfwise-app .book-detail-layout { grid-template-columns: 1fr; }
-  .shelfwise-app .book-cover-placeholder {
+  .shelfwise-app .book-cover-placeholder,
+  .shelfwise-app .book-cover-frame,
+  .shelfwise-app .book-cover-image {
     max-width: 160px;
     width: 100%;
   }
