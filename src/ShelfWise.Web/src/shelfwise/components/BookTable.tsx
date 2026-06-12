@@ -6,21 +6,13 @@ const pageSizeOptions = [10, 25, 50]
 type BookTableProps = {
   books: Book[]
   loading: boolean
-  canManageBooks: boolean
-  canDeleteBooks: boolean
-  onEdit: (book: Book) => void
-  onDelete: (book: Book) => void
-  onOpenCirculation: (mode: 'checkout' | 'checkin', book: Book) => void
+  onSelect: (book: Book) => void
 }
 
 export function BookTable({
   books,
   loading,
-  canManageBooks,
-  canDeleteBooks,
-  onEdit,
-  onDelete,
-  onOpenCirculation
+  onSelect
 }: BookTableProps) {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
@@ -56,12 +48,11 @@ export function BookTable({
               <th>Total</th>
               <th>Out</th>
               <th>Available</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {pagedBooks.map(book => (
-              <tr key={book.id}>
+              <tr key={book.id} className="clickable-row" onClick={() => onSelect(book)}>
                 <td className="title-cell">{book.title}</td>
                 <td>{book.author}</td>
                 <td>{book.category}</td>
@@ -72,26 +63,6 @@ export function BookTable({
                   <span className={book.availableCopies > 0 ? 'pill available' : 'pill unavailable'}>
                     {book.availableCopies}
                   </span>
-                </td>
-                <td>
-                  <div className="row-actions">
-                    {canManageBooks && (
-                      <>
-                        <button type="button" className="secondary" onClick={() => onEdit(book)}>Edit</button>
-                        {book.availableCopies > 0 && (
-                          <button type="button" onClick={() => onOpenCirculation('checkout', book)}>
-                            Check Out
-                          </button>
-                        )}
-                        {book.checkedOutCopies > 0 && (
-                          <button type="button" className="secondary" onClick={() => onOpenCirculation('checkin', book)}>
-                            Check In
-                          </button>
-                        )}
-                      </>
-                    )}
-                    {canDeleteBooks && <button type="button" className="danger" onClick={() => onDelete(book)}>Delete</button>}
-                  </div>
                 </td>
               </tr>
             ))}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { request } from './api'
 import { AiLibrarian } from './components/AiLibrarian'
+import { BookDetailsModal } from './components/BookDetailsModal'
 import { BookForm } from './components/BookForm'
 import { BookTable } from './components/BookTable'
 import { CirculationModal } from './components/CirculationModal'
@@ -28,15 +29,17 @@ const emptyUser: UserFormState = {
 export default function App() {
   const [books, setBooks] = useState<Book[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [role, setRole] = useState<Role>('Librarian')
+  const [role, setRole] = useState<Role>('Patron')
   const [search, setSearch] = useState('')
   const [aiQuery, setAiQuery] = useState('')
   const [aiResult, setAiResult] = useState<AiBookSearchResult | null>(null)
   const [circulation, setCirculation] = useState<CirculationState | null>(null)
   const [circulationUserId, setCirculationUserId] = useState('')
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null)
   const [form, setForm] = useState<BookFormState>(emptyBook)
   const [userForm, setUserForm] = useState<UserFormState>(emptyUser)
   const [editingId, setEditingId] = useState<number | null>(null)
+  const [returnToDetailsId, setReturnToDetailsId] = useState<number | null>(null)
   const [bookModalOpen, setBookModalOpen] = useState(false)
   const [userModalOpen, setUserModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -113,9 +116,16 @@ export default function App() {
   }
 
   function resetForm() {
+    const detailsId = returnToDetailsId
     setForm(emptyBook)
     setEditingId(null)
+    setReturnToDetailsId(null)
     setBookModalOpen(false)
+
+    if (detailsId) {
+      const latestBook = books.find(book => book.id === detailsId)
+      if (latestBook) setSelectedBook(latestBook)
+    }
   }
 
   function openAddBookModal() {
@@ -123,12 +133,15 @@ export default function App() {
     setMessage('')
     setForm(emptyBook)
     setEditingId(null)
+    setReturnToDetailsId(null)
     setBookModalOpen(true)
   }
 
   function editBook(book: Book) {
     setError('')
     setMessage('')
+    setReturnToDetailsId(selectedBook?.id === book.id ? book.id : null)
+    setSelectedBook(null)
     setEditingId(book.id)
     setForm({
       title: book.title,
@@ -180,8 +193,16 @@ export default function App() {
         }, role)
         setMessage('Book added.')
       }
-      resetForm()
+      const detailsId = returnToDetailsId
+      setForm(emptyBook)
+      setEditingId(null)
+      setReturnToDetailsId(null)
+      setBookModalOpen(false)
       await loadBooks()
+      if (detailsId) {
+        const refreshed = await request<Book>(`/api/books/${detailsId}`, {}, role)
+        setSelectedBook(refreshed)
+      }
     } catch (err) {
       setError(toErrorMessage(err))
     } finally {
@@ -239,6 +260,7 @@ export default function App() {
     if (typeof window !== 'undefined' && !window.confirm(`Delete "${book.title}"?`)) return
     setError('')
     setMessage('')
+    setSelectedBook(null)
 
     try {
       await request<null>(`/api/books/${book.id}`, { method: 'DELETE' }, role)
@@ -253,6 +275,7 @@ export default function App() {
     setError('')
     setMessage('')
     setModalError('')
+    setSelectedBook(null)
     setCirculation({ mode, book })
     setCirculationUserId(users.length > 0 ? String(users[0].id) : '')
   }
@@ -323,13 +346,19 @@ export default function App() {
         <BookTable
           books={books}
           loading={loading}
-          canManageBooks={canManageBooks}
-          canDeleteBooks={canDeleteBooks}
-          onEdit={editBook}
-          onDelete={deleteBook}
-          onOpenCirculation={openCirculationModal}
+          onSelect={setSelectedBook}
         />
       </section>
+
+      <BookDetailsModal
+        book={selectedBook}
+        canManageBooks={canManageBooks}
+        canDeleteBooks={canDeleteBooks}
+        onEdit={editBook}
+        onDelete={deleteBook}
+        onOpenCirculation={openCirculationModal}
+        onClose={() => setSelectedBook(null)}
+      />
 
       <CirculationModal
         circulation={circulation}

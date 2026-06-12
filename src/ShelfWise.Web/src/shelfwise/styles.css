@@ -496,6 +496,10 @@ body {
   transition: background .15s ease;
 }
 
+.shelfwise-app .clickable-row {
+  cursor: pointer;
+}
+
 .shelfwise-app tbody tr:hover {
   background: color-mix(in oklab, var(--color-brass) 8%, transparent);
 }
@@ -652,12 +656,92 @@ body {
   max-width: 560px;
 }
 
+.shelfwise-app .detail-modal {
+  max-width: 760px;
+}
+
 .shelfwise-app .form-modal .book-form,
 .shelfwise-app .form-modal .user-form {
   background: transparent;
   border: 0;
   border-radius: 0;
   padding: 0;
+}
+
+.shelfwise-app .book-detail-layout {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: 180px minmax(0, 1fr);
+}
+
+.shelfwise-app .book-cover-placeholder {
+  align-items: center;
+  aspect-ratio: 2 / 3;
+  background:
+    linear-gradient(145deg, color-mix(in oklab, var(--color-ink) 88%, black), var(--color-ink-soft)),
+    var(--color-ink);
+  border: 1px solid color-mix(in oklab, var(--color-brass) 45%, transparent);
+  border-radius: 6px;
+  box-shadow: 0 22px 45px -28px rgba(15,27,61,.75);
+  color: var(--color-brass);
+  display: flex;
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 800;
+  justify-content: center;
+}
+
+.shelfwise-app .book-detail-content {
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+}
+
+.shelfwise-app .detail-kicker {
+  color: var(--color-brass-deep);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.shelfwise-app .detail-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.shelfwise-app .detail-grid div {
+  background: color-mix(in oklab, var(--color-brass) 8%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+  border-radius: 5px;
+  padding: 12px 14px;
+}
+
+.shelfwise-app .detail-grid dt {
+  color: var(--color-ink-muted);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.shelfwise-app .detail-grid dd {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.shelfwise-app .detail-actions {
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 @keyframes shelfwise-rise {
@@ -723,5 +807,11 @@ body {
   .shelfwise-app .action-bar { align-items: stretch; flex-direction: column; }
   .shelfwise-app .header-controls { align-items: stretch; flex-direction: column; }
   .shelfwise-app .pagination { align-items: stretch; flex-direction: column; }
+  .shelfwise-app .book-detail-layout { grid-template-columns: 1fr; }
+  .shelfwise-app .book-cover-placeholder {
+    max-width: 160px;
+    width: 100%;
+  }
+  .shelfwise-app .detail-grid { grid-template-columns: 1fr; }
   .shelfwise-app th, .shelfwise-app td { padding: 14px 14px; }
 }
