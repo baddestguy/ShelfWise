@@ -18,7 +18,7 @@ done
 echo " Postgres ready"
 
 echo "Running dotnet tests"
-dotnet test tests/ShelfWise.Tests
+dotnet test ShelfWise.sln
 
 echo "Tests finished; tearing down..."
 docker compose down
