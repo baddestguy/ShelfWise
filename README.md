@@ -1,6 +1,11 @@
 # ShelfWise
 
-ShelfWise is a library management app built with an ASP.NET Core API, PostgreSQL, and a React dashboard.
+ShelfWise is a library management app built with an ASP.NET Core API, PostgreSQL, and a TypeScript React dashboard.
+
+## Live Demo
+
+- Web app: https://shelfwise-web-production.up.railway.app
+- API: https://shelfwise-api-production.up.railway.app/api/books
 
 ## Features
 
@@ -9,7 +14,7 @@ ShelfWise is a library management app built with an ASP.NET Core API, PostgreSQL
 - Circulation: check books out to users and check them back in.
 - User management: list users and create users as an Admin.
 - Role-based demo authentication using `X-User-Role`.
-- React dashboard for search, inventory, circulation, user selection, and role switching.
+- TypeScript React dashboard for search, inventory, circulation, user selection, and role switching.
 - In-memory cache for book inventory and search responses, invalidated after mutations.
 - AI Librarian semantic search using OpenAI embeddings when `OPENAI_API_KEY` is configured, with a local fallback when it is not.
 - Docker Compose setup for the API, web app, and PostgreSQL database.
@@ -18,7 +23,7 @@ ShelfWise is a library management app built with an ASP.NET Core API, PostgreSQL
 
 - Backend: ASP.NET Core 8 Web API
 - Data: PostgreSQL, Entity Framework Core
-- Frontend: React + Vite
+- Frontend: TypeScript, React, Vite
 - Runtime/dev environment: Docker Compose
 
 ## Quick Start
@@ -50,6 +55,8 @@ OPENAI_API_KEY=your_api_key
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 ```
 
+You can copy `.env.example` as a starting point. Do not commit `.env`.
+
 Then run:
 
 ```bash
@@ -79,6 +86,13 @@ Run the frontend directly:
 cd src/ShelfWise.Web
 npm ci
 npm run dev
+```
+
+For a hosted frontend that proxies API calls to a public API service, configure:
+
+```env
+VITE_API_TARGET=https://your-api-domain.example.com
+VITE_ALLOWED_HOSTS=your-web-domain.example.com
 ```
 
 Run tests:
@@ -183,17 +197,17 @@ The solution is split into small projects:
 - `ShelfWise.Domain`: domain models.
 - `ShelfWise.Repository`: EF Core DbContext, schema initialization, repositories.
 - `ShelfWise.Services`: business logic, cache behavior, circulation rules.
-- `ShelfWise.Web`: React dashboard.
+- `ShelfWise.Web`: TypeScript React dashboard.
 
 ## Current Tradeoffs
 
 - Authentication uses a demo header scheme rather than real SSO. The authorization policies are intentionally structured so a real SSO/JWT provider can replace the demo handler later.
 - The local database setup includes deterministic schema creation for demo reliability.
 - Email notifications are a planned bonus item and are not required to run the current product.
+- The app is deployed on Railway as separate web, API, and PostgreSQL services.
 
 ## Planned Enhancements
 
 - Real SSO through OpenID Connect/JWT.
 - Persisted/vector-indexed embeddings for larger catalogs.
 - Overdue notification worker for past-due loans.
-- Deployment URL for live testing.
