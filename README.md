@@ -12,7 +12,7 @@ ShelfWise is a library management app built with an ASP.NET Core API, PostgreSQL
 - Book management: add, edit, delete, list, and search books.
 - Inventory tracking: total copies, checked-out copies, and available copies.
 - Circulation: check books out to users and check them back in.
-- User management: list users and create users as an Admin.
+- User management: list users as a Librarian/Admin and create users as an Admin.
 - Role-based demo authentication using `X-User-Role`.
 - TypeScript React dashboard for search, inventory, circulation, user selection, and role switching.
 - In-memory cache for book inventory and search responses, invalidated after mutations.
@@ -42,7 +42,7 @@ Open:
 
 - Web app: http://localhost:3000
 - API books endpoint: http://localhost:5000/api/books
-- API users endpoint: http://localhost:5000/api/users
+- API users endpoint: http://localhost:5000/api/users (requires `Librarian` or `Admin`)
 
 The API applies database setup on startup and seeds sample books/users in Development or when `SEED_DB=true`.
 
@@ -113,12 +113,12 @@ Supported roles:
 
 Permissions:
 
-- Public reads:
+- Patron reads:
   - `GET /api/books`
   - `GET /api/books/{id}`
+- Librarian or Admin:
   - `GET /api/users`
   - `GET /api/users/{id}`
-- Librarian or Admin:
   - `POST /api/books`
   - `PATCH /api/books/{id}`
   - `POST /api/books/{id}/checkout`

@@ -19,6 +19,7 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<ActionResult<IEnumerable<User>>> GetAll(CancellationToken ct)
         {
             var users = await _db.Users
@@ -31,6 +32,7 @@ namespace ShelfWise.Api.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Policy = "LibrarianOrAdmin")]
         public async Task<ActionResult<User>> GetById(int id, CancellationToken ct)
         {
             var user = await _db.Users

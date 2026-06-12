@@ -46,7 +46,7 @@ export function BookForm({ form, editingId, saving, onSubmit, onChange, onCancel
       </label>
       <div className="form-actions">
         <button type="submit" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Save Changes' : 'Add Book'}</button>
-        {editingId && <button type="button" className="secondary" onClick={onCancel}>Cancel</button>}
+        <button type="button" className="secondary" onClick={onCancel}>Cancel</button>
       </div>
     </form>
   )

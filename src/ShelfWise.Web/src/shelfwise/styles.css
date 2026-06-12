@@ -243,10 +243,24 @@ body {
   align-items: end;
   display: flex;
   gap: 14px;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 
 .shelfwise-app .search-field { flex: 1; }
+
+.shelfwise-app .action-bar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
+.shelfwise-app .action-bar button {
+  min-height: 38px;
+  padding: 0 18px;
+}
 
 /* ---------- notice ---------- */
 .shelfwise-app .notice {
@@ -634,6 +648,18 @@ body {
   animation: shelfwise-rise .22s cubic-bezier(.2,.7,.3,1);
 }
 
+.shelfwise-app .form-modal {
+  max-width: 560px;
+}
+
+.shelfwise-app .form-modal .book-form,
+.shelfwise-app .form-modal .user-form {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+
 @keyframes shelfwise-rise {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -694,6 +720,7 @@ body {
   .shelfwise-app .app-shell { padding: 24px 18px 40px; }
   .shelfwise-app .topbar,
   .shelfwise-app .toolbar { align-items: stretch; flex-direction: column; }
+  .shelfwise-app .action-bar { align-items: stretch; flex-direction: column; }
   .shelfwise-app .header-controls { align-items: stretch; flex-direction: column; }
   .shelfwise-app .pagination { align-items: stretch; flex-direction: column; }
   .shelfwise-app th, .shelfwise-app td { padding: 14px 14px; }

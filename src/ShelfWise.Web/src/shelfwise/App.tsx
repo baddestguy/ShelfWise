@@ -37,6 +37,8 @@ export default function App() {
   const [form, setForm] = useState<BookFormState>(emptyBook)
   const [userForm, setUserForm] = useState<UserFormState>(emptyUser)
   const [editingId, setEditingId] = useState<number | null>(null)
+  const [bookModalOpen, setBookModalOpen] = useState(false)
+  const [userModalOpen, setUserModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [aiSearching, setAiSearching] = useState(false)
@@ -63,10 +65,11 @@ export default function App() {
     setLoading(true)
     setError('')
     try {
-      const [bookData, userData] = await Promise.all([
-        request<Book[]>('/api/books', {}, role),
-        request<User[]>('/api/users', {}, role)
-      ])
+      const bookData = await request<Book[]>('/api/books', {}, role)
+      const userData = canManageBooks
+        ? await request<User[]>('/api/users', {}, role)
+        : []
+
       setBooks(bookData)
       setUsers(userData)
     } catch (err) {
@@ -80,6 +83,12 @@ export default function App() {
     loadInitialData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role])
+
+  useEffect(() => {
+    if (!canManageBooks) resetForm()
+    if (!canCreateUsers) closeUserModal()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canManageBooks, canCreateUsers])
 
   useEffect(() => {
     const handle = window.setTimeout(async () => {
@@ -106,9 +115,20 @@ export default function App() {
   function resetForm() {
     setForm(emptyBook)
     setEditingId(null)
+    setBookModalOpen(false)
+  }
+
+  function openAddBookModal() {
+    setError('')
+    setMessage('')
+    setForm(emptyBook)
+    setEditingId(null)
+    setBookModalOpen(true)
   }
 
   function editBook(book: Book) {
+    setError('')
+    setMessage('')
     setEditingId(book.id)
     setForm({
       title: book.title,
@@ -117,6 +137,19 @@ export default function App() {
       genre: book.genre,
       totalCopies: book.totalCopies
     })
+    setBookModalOpen(true)
+  }
+
+  function closeUserModal() {
+    setUserForm(emptyUser)
+    setUserModalOpen(false)
+  }
+
+  function openUserModal() {
+    setError('')
+    setMessage('')
+    setUserForm(emptyUser)
+    setUserModalOpen(true)
   }
 
   async function saveBook(event: React.FormEvent<HTMLFormElement>) {
@@ -174,7 +207,7 @@ export default function App() {
       }, role)
       const nextUsers = await request<User[]>('/api/users', {}, role)
       setUsers(nextUsers)
-      setUserForm(emptyUser)
+      closeUserModal()
       setMessage(`User created: ${created.firstName} ${created.lastName}.`)
     } catch (err) {
       setError(toErrorMessage(err))
@@ -266,6 +299,12 @@ export default function App() {
     <main className="app-shell">
       <Header bookCount={books.length} role={role} onRoleChange={setRole} />
       <SearchToolbar search={search} onSearchChange={setSearch} />
+      {(canManageBooks || canCreateUsers) && (
+        <section className="action-bar" aria-label="Management actions">
+          {canManageBooks && <button type="button" onClick={openAddBookModal}>Add Book</button>}
+          {canCreateUsers && <button type="button" className="secondary" onClick={openUserModal}>Add User</button>}
+        </section>
+      )}
       <Notice message={message} error={error} />
 
       <section className="workspace">
@@ -278,27 +317,7 @@ export default function App() {
             onSubmit={runAiSearch}
           />
 
-          {canManageBooks ? (
-            <BookForm
-              form={form}
-              editingId={editingId}
-              saving={saving}
-              onSubmit={saveBook}
-              onChange={updateForm}
-              onCancel={resetForm}
-            />
-          ) : (
-            <PermissionCard />
-          )}
-
-          {canCreateUsers && (
-            <UserForm
-              form={userForm}
-              saving={savingUser}
-              onSubmit={createUser}
-              onChange={updateUserForm}
-            />
-          )}
+          {!canManageBooks && <PermissionCard />}
         </aside>
 
         <BookTable
@@ -321,6 +340,35 @@ export default function App() {
         onSubmit={submitCirculation}
         onClose={closeCirculationModal}
       />
+
+      {bookModalOpen && (
+        <div className="modal-backdrop" role="presentation">
+          <div className="modal form-modal" role="dialog" aria-modal="true">
+            <BookForm
+              form={form}
+              editingId={editingId}
+              saving={saving}
+              onSubmit={saveBook}
+              onChange={updateForm}
+              onCancel={resetForm}
+            />
+          </div>
+        </div>
+      )}
+
+      {userModalOpen && (
+        <div className="modal-backdrop" role="presentation">
+          <div className="modal form-modal" role="dialog" aria-modal="true">
+            <UserForm
+              form={userForm}
+              saving={savingUser}
+              onSubmit={createUser}
+              onChange={updateUserForm}
+              onCancel={closeUserModal}
+            />
+          </div>
+        </div>
+      )}
     </main>
   )
 }
