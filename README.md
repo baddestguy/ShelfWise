@@ -117,6 +117,16 @@ Run tests:
 dotnet test ShelfWise.sln
 ```
 
+Run frontend smoke tests against a running local app:
+
+```bash
+cd src/ShelfWise.Web
+npx playwright install chromium
+npm run test:e2e
+```
+
+The Playwright suite is intentionally local-only for now because it expects the API, web app, and database to be running together.
+
 ## Auth And Roles
 
 ShelfWise uses username/password login with JWT bearer tokens. Passwords are salted and hashed with ASP.NET Core's `PasswordHasher<TUser>`, and the JWT contains the user's role claim for API authorization.
