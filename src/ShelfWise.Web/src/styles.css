@@ -244,14 +244,11 @@ textarea {
   gap: 8px;
 }
 
-.permission-note {
-  color: #7a4f01;
-  font-size: 13px;
-  font-weight: 700;
-  margin: 0;
+.book-table-panel {
+  overflow: hidden;
 }
 
-.book-table-panel {
+.table-scroll {
   overflow-x: auto;
 }
 
@@ -315,6 +312,41 @@ th {
   color: #617080;
   font-weight: 700;
   padding: 28px;
+}
+
+.pagination {
+  align-items: center;
+  background: #ffffff;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.pagination,
+.pagination label {
+  color: #52616f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pagination-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pagination-controls label {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+.pagination-controls select {
+  min-height: 32px;
+  min-width: 72px;
+  padding: 4px 8px;
 }
 
 .modal-backdrop {
@@ -381,5 +413,10 @@ th {
 
   .workspace {
     grid-template-columns: 1fr;
+  }
+
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
